@@ -26,12 +26,14 @@ export default function Home() {
                 >
                   Ver Catálogo
                 </Link>
-                <Link
-                  to="/contacto"
+                <a
+                  href="https://api.whatsapp.com/send/?phone=543465668393&text=Holaa+Quiero+hacer+una+consulta&type=phone_number&app_absent=0"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="inline-block bg-gray-100 text-gray-900 px-8 py-4 rounded-lg font-bold text-lg hover:bg-gray-200 transition-all duration-300 text-center"
                 >
                   Contactar Asesor
-                </Link>
+                </a>
               </div>
 
               {/* Stats */}

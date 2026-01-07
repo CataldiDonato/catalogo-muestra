@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import API_ENDPOINTS from "../config";
 
 export default function CarDetail() {
@@ -8,6 +8,7 @@ export default function CarDetail() {
   const [car, setCar] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [relatedCars, setRelatedCars] = useState([]);
 
   useEffect(() => {
     const fetchCar = async () => {
@@ -30,7 +31,24 @@ export default function CarDetail() {
       }
     };
 
+    const fetchRelatedCars = async () => {
+      try {
+        const response = await fetch(API_ENDPOINTS.VEHICLES);
+        if (response.ok) {
+          const data = await response.json();
+          // Filter out current car and sort specifically or shuffle
+          const otherCars = data.filter((c) => c.id !== parseInt(id));
+          // Get 3 random cars
+          const shuffled = otherCars.sort(() => 0.5 - Math.random());
+          setRelatedCars(shuffled.slice(0, 3));
+        }
+      } catch (err) {
+        console.error("Error loading related cars:", err);
+      }
+    };
+
     fetchCar();
+    fetchRelatedCars();
   }, [id]);
 
   if (loading) {
@@ -66,10 +84,11 @@ export default function CarDetail() {
     );
   }
 
-  const formattedPrice = new Intl.NumberFormat("es-MX", {
-    style: "currency",
-    currency: "USD",
-  }).format(car.price);
+  const formattedPrice = (price) =>
+    new Intl.NumberFormat("es-MX", {
+      style: "currency",
+      currency: "USD",
+    }).format(price);
 
   return (
     <div className="min-h-screen bg-white py-12">
@@ -115,7 +134,9 @@ export default function CarDetail() {
           <div>
             <div className="bg-blue-600 text-white p-8 rounded-xl shadow-lg sticky top-20">
               <p className="text-sm text-blue-100 mb-2">Precio Final</p>
-              <p className="text-4xl font-bold mb-6">{formattedPrice}</p>
+              <p className="text-4xl font-bold mb-6">
+                {formattedPrice(car.price)}
+              </p>
 
               <div className="space-y-3 mb-6">
                 <p className="text-blue-100 text-sm">
@@ -125,12 +146,22 @@ export default function CarDetail() {
                 <p className="text-blue-100 text-sm">✓ Entrega inmediata</p>
               </div>
 
-              <button className="w-full bg-white text-blue-600 py-3 rounded-lg font-bold text-lg hover:bg-gray-100 transition mb-3">
+              <a
+                href="https://api.whatsapp.com/send/?phone=543465668393&text=Holaa+Quiero+hacer+una+consulta&type=phone_number&app_absent=0"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block w-full text-center bg-white text-blue-600 py-3 rounded-lg font-bold text-lg hover:bg-gray-100 transition mb-3"
+              >
                 Solicitar Prueba
-              </button>
-              <button className="w-full bg-blue-700 text-white py-3 rounded-lg font-bold hover:bg-blue-800 transition">
+              </a>
+              <a
+                href="https://api.whatsapp.com/send/?phone=543465668393&text=Holaa+Quiero+hacer+una+consulta&type=phone_number&app_absent=0"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block w-full text-center bg-blue-700 text-white py-3 rounded-lg font-bold hover:bg-blue-800 transition"
+              >
                 Contactar Vendedor
-              </button>
+              </a>
             </div>
           </div>
         </div>
@@ -353,10 +384,64 @@ export default function CarDetail() {
             Contacta con nuestros asesores ahora y obtén una prueba de manejo
             gratuita
           </p>
-          <button className="bg-white text-blue-600 px-10 py-4 rounded-lg font-bold text-lg hover:bg-gray-100 transition">
+          <a
+            href="https://api.whatsapp.com/send/?phone=543465668393&text=Holaa+Quiero+hacer+una+consulta&type=phone_number&app_absent=0"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block bg-white text-blue-600 px-10 py-4 rounded-lg font-bold text-lg hover:bg-gray-100 transition"
+          >
             Solicitar Información
-          </button>
+          </a>
         </div>
+
+
+        {/* Autos Relacionados Carousel */}
+        {relatedCars.length > 0 && (
+          <div className="mt-16 border-t pt-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-8">
+              Autos Relacionados
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {relatedCars.map((related) => (
+                <div
+                  key={related.id}
+                  className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 hover:shadow-xl transition-shadow duration-300"
+                >
+                  <div className="h-48 overflow-hidden">
+                    <img
+                      src={related.image_url}
+                      alt={`${related.brand} ${related.model}`}
+                      className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-500"
+                    />
+                  </div>
+                  <div className="p-6">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">
+                      {related.brand} {related.model}
+                    </h3>
+                    <p className="text-gray-600 mb-4 text-sm line-clamp-2">
+                      {related.description}
+                    </p>
+                    <div className="flex justify-between items-end">
+                      <div>
+                        <p className="text-xs text-gray-500 mb-1">Precio</p>
+                        <p className="text-xl font-bold text-blue-600">
+                          {formattedPrice(related.price)}
+                        </p>
+                      </div>
+                      <Link
+                        to={`/catalogo/${related.id}`}
+                        onClick={() => window.scrollTo(0, 0)}
+                        className="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-800 transition"
+                      >
+                        Ver Detalle
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
