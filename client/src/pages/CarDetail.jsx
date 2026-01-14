@@ -266,9 +266,9 @@ export default function CarDetail() {
                 )}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block w-full text-center bg-green-600 text-white py-3 rounded-lg font-bold text-lg hover:bg-green-700 transition flex items-center justify-center gap-2"
+                className="block w-full text-center bg-green-600 text-white py-4 rounded-lg font-bold text-lg hover:bg-green-700 transition flex items-center justify-center gap-2 shadow-lg active:scale-95"
               >
-                <img src={whatsappIcon} alt="WhatsApp" className="w-6 h-6" />
+                <img src={whatsappIcon} alt="WhatsApp" className="w-8 h-8" />
                 Contactar Vendedor
               </a>
 
@@ -291,7 +291,7 @@ export default function CarDetail() {
                     alert("¡Enlace copiado al portapapeles!");
                   }
                 }}
-                className="block w-full text-center bg-gray-200 text-gray-800 py-3 rounded-lg font-bold text-lg hover:bg-gray-300 transition mt-3"
+                className="block w-full text-center bg-gray-200 text-gray-800 py-4 rounded-lg font-bold text-lg hover:bg-gray-300 transition mt-3 shadow active:scale-95"
               >
                 Compartir 🔗
               </button>
@@ -433,7 +433,7 @@ export default function CarDetail() {
           >
             <button
               onClick={() => setShowZoom(false)}
-              className="absolute top-4 right-4 text-white text-4xl hover:text-gray-300 z-50"
+              className="absolute top-4 right-4 text-white text-4xl p-4 hover:text-gray-300 z-50 bg-black/50 rounded-full"
             >
               ✕
             </button>

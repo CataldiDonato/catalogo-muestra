@@ -81,14 +81,14 @@ export default function Navigation() {
           <div className="md:hidden pb-4 space-y-2 border-t border-emerald-800 bg-emerald-900">
             <Link
               to="/"
-              className="block py-2 text-emerald-100 font-medium hover:text-white transition px-4"
+              className="block py-3 text-emerald-100 font-medium hover:text-white transition px-6 text-lg"
               onClick={() => setIsOpen(false)}
             >
               Inicio
             </Link>
             <Link
               to="/catalogo"
-              className="block py-2 text-emerald-100 font-medium hover:text-white transition px-4"
+              className="block py-3 text-emerald-100 font-medium hover:text-white transition px-6 text-lg"
               onClick={() => setIsOpen(false)}
             >
               Catálogo
@@ -103,7 +103,7 @@ export default function Navigation() {
                 </p>
                 <Link
                   to="/admin"
-                  className="block py-2 bg-emerald-700 hover:bg-emerald-600 text-white rounded font-medium text-center transition"
+                  className="block py-3 bg-emerald-700 hover:bg-emerald-600 text-white rounded font-medium text-center transition"
                   onClick={() => setIsOpen(false)}
                 >
                   Panel Admin
@@ -113,7 +113,7 @@ export default function Navigation() {
                     handleLogout();
                     setIsOpen(false);
                   }}
-                  className="w-full py-2 bg-red-700 hover:bg-red-600 text-white rounded font-medium transition"
+                  className="w-full py-3 bg-red-700 hover:bg-red-600 text-white rounded font-medium transition"
                 >
                   Cerrar Sesión
                 </button>
@@ -121,7 +121,7 @@ export default function Navigation() {
             ) : (
               <Link
                 to="/auth"
-                className="block py-2 bg-emerald-700 hover:bg-emerald-600 text-white rounded font-medium text-center transition mb-2 mx-4"
+                className="block py-3 bg-emerald-700 hover:bg-emerald-600 text-white rounded font-medium text-center transition mb-2 mx-4 text-lg"
                 onClick={() => setIsOpen(false)}
               >
                 Iniciar Sesión
