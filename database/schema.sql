@@ -49,6 +49,7 @@ CREATE TABLE IF NOT EXISTS publication_images (
 );
 
 -- Crear índices
-CREATE INDEX idx_publications_category ON publications(category);
-CREATE INDEX idx_contacts_email ON contacts(email);
-CREATE INDEX idx_publication_images_publication_id ON publication_images(publication_id);
+CREATE INDEX IF NOT EXISTS idx_publications_category ON publications(category);
+CREATE INDEX IF NOT EXISTS idx_contacts_email ON contacts(email);
+CREATE INDEX IF NOT EXISTS idx_publication_images_publication_id ON publication_images(publication_id);
+CREATE INDEX IF NOT EXISTS idx_publications_specs ON publications USING GIN (specs);
