@@ -15,17 +15,23 @@ export default function CarDetail() {
     const fetchCar = async () => {
       try {
         setLoading(true);
-        const response = await fetch(API_ENDPOINTS.VEHICLE_DETAIL(id));
+        const response = await fetch(API_ENDPOINTS.PUBLICATION_DETAIL(id));
         if (!response.ok) {
-          throw new Error("Auto no encontrado");
+          throw new Error("Publicación no encontrada");
         }
         const data = await response.json();
-        setCar(data);
+        const mappedCar = {
+            ...data,
+            ...data.specs,
+             brand: data.specs?.brand || (data.title ? data.title.split(' ')[0] : 'Varios'), 
+             model: data.specs?.model || (data.title ? data.title.substring(data.title.indexOf(' ')+1) : ''),
+        };
+        setCar(mappedCar);
         setError(null);
         setCurrentImageIndex(0);
       } catch (err) {
         console.error("Error:", err);
-        setError("No pudimos cargar los detalles del auto");
+        setError("No pudimos cargar los detalles.");
       } finally {
         setLoading(false);
       }
@@ -33,11 +39,19 @@ export default function CarDetail() {
 
     const fetchRelatedCars = async () => {
       try {
-        const response = await fetch(API_ENDPOINTS.VEHICLES);
+        const response = await fetch(API_ENDPOINTS.PUBLICATIONS);
         if (response.ok) {
           const data = await response.json();
           // Filter out current car and sort specifically or shuffle
-          const otherCars = data.filter((c) => c.id !== parseInt(id));
+          const otherCars = data
+            .filter((c) => c.id !== parseInt(id))
+            .map(item => ({
+                ...item,
+                ...item.specs,
+                brand: item.specs?.brand || (item.title ? item.title.split(' ')[0] : 'Varios'), 
+                model: item.specs?.model || (item.title ? item.title.substring(item.title.indexOf(' ')+1) : ''),
+           }));
+
           // Get 3 random cars
           const shuffled = otherCars.sort(() => 0.5 - Math.random());
           setRelatedCars(shuffled.slice(0, 3));
@@ -76,7 +90,7 @@ export default function CarDetail() {
       <div className="flex justify-center items-center min-h-screen">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-          <p className="text-gray-600 text-lg">Cargando detalles del auto...</p>
+          <p className="text-gray-600 text-lg">Cargando detalles...</p>
         </div>
       </div>
     );
@@ -122,9 +136,9 @@ export default function CarDetail() {
             ← Volver al Catálogo
           </button>
           <h1 className="text-4xl font-bold text-gray-900">
-            {car.brand} {car.model}
+            {car.title || `${car.brand} ${car.model}`}
           </h1>
-          <p className="text-xl text-gray-600 mt-2">Año {car.year}</p>
+          {car.year && <p className="text-xl text-gray-600 mt-2">Año {car.year}</p>}
         </div>
 
         {/* Grid Principal */}
@@ -259,225 +273,110 @@ export default function CarDetail() {
               >
                 Contactar Vendedor
               </a>
+
+              <button
+                onClick={async () => {
+                  const shareData = {
+                    title: car.title || `${car.brand} ${car.model}`,
+                    text: `Mira este ${car.title || `${car.brand} ${car.model}`} en venta!`,
+                    url: window.location.href,
+                  };
+
+                  if (navigator.share) {
+                    try {
+                      await navigator.share(shareData);
+                    } catch (err) {
+                      console.log("Error sharing", err);
+                    }
+                  } else {
+                    navigator.clipboard.writeText(window.location.href);
+                    alert("¡Enlace copiado al portapapeles!");
+                  }
+                }}
+                className="block w-full text-center bg-gray-200 text-gray-800 py-3 rounded-lg font-bold text-lg hover:bg-gray-300 transition mt-3"
+              >
+                Compartir 🔗
+              </button>
             </div>
           </div>
         </div>
+        
+        {/* Renderizado dinámico de specs */}
+        {car.category === 'VEHICULO' && (
         <div className="bg-gray-50 p-8 rounded-xl mb-12">
           <h2 className="text-3xl font-bold text-gray-900 mb-8">
             Ficha Técnica
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* Motor */}
             <div className="bg-white p-6 rounded-lg shadow-sm">
-              <h3 className="text-sm font-semibold text-gray-600 mb-2">
-                MOTOR
-              </h3>
-              <p className="text-lg font-bold text-gray-900">{car.motor}</p>
+              <h3 className="text-sm font-semibold text-gray-600 mb-2">MOTOR</h3>
+              <p className="text-lg font-bold text-gray-900">{car.motor || 'N/A'}</p>
             </div>
-
-            {/* Potencia */}
             <div className="bg-white p-6 rounded-lg shadow-sm">
-              <h3 className="text-sm font-semibold text-gray-600 mb-2">
-                POTENCIA
-              </h3>
-              <p className="text-lg font-bold text-gray-900">{car.potencia}</p>
+              <h3 className="text-sm font-semibold text-gray-600 mb-2">POTENCIA</h3>
+              <p className="text-lg font-bold text-gray-900">{car.potencia || 'N/A'}</p>
             </div>
-
-            {/* Torque */}
             <div className="bg-white p-6 rounded-lg shadow-sm">
-              <h3 className="text-sm font-semibold text-gray-600 mb-2">
-                TORQUE
-              </h3>
-              <p className="text-lg font-bold text-gray-900">{car.torque}</p>
+              <h3 className="text-sm font-semibold text-gray-600 mb-2">TRANSMISIÓN</h3>
+              <p className="text-lg font-bold text-gray-900">{car.transmision || 'N/A'}</p>
             </div>
-
-            {/* Cilindrada */}
             <div className="bg-white p-6 rounded-lg shadow-sm">
-              <h3 className="text-sm font-semibold text-gray-600 mb-2">
-                CILINDRADA
-              </h3>
-              <p className="text-lg font-bold text-gray-900">
-                {car.cilindrada}
-              </p>
-            </div>
-
-            {/* Combustible */}
-            <div className="bg-white p-6 rounded-lg shadow-sm">
-              <h3 className="text-sm font-semibold text-gray-600 mb-2">
-                COMBUSTIBLE
-              </h3>
-              <p className="text-lg font-bold text-gray-900">
-                {car.combustible}
-              </p>
-            </div>
-
-            {/* Transmisión */}
-            <div className="bg-white p-6 rounded-lg shadow-sm">
-              <h3 className="text-sm font-semibold text-gray-600 mb-2">
-                TRANSMISIÓN
-              </h3>
-              <p className="text-lg font-bold text-gray-900">
-                {car.transmision}
-              </p>
-            </div>
-
-            {/* Tracción */}
-            <div className="bg-white p-6 rounded-lg shadow-sm">
-              <h3 className="text-sm font-semibold text-gray-600 mb-2">
-                TRACCIÓN
-              </h3>
-              <p className="text-lg font-bold text-gray-900">{car.traccion}</p>
-            </div>
-
-            {/* Velocidad Máxima */}
-            <div className="bg-white p-6 rounded-lg shadow-sm">
-              <h3 className="text-sm font-semibold text-gray-600 mb-2">
-                VELOCIDAD MÁXIMA
-              </h3>
-              <p className="text-lg font-bold text-gray-900">
-                {car.velocidad_maxima}
-              </p>
+                <h3 className="text-sm font-semibold text-gray-600 mb-2">KM</h3>
+                <p className="text-lg font-bold text-gray-900">{car.km || '0'} km</p>
             </div>
           </div>
         </div>
-
-        {/* Consumo de Combustible */}
-        <div className="bg-white border border-gray-200 p-8 rounded-xl mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8">
-            Consumo de Combustible
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="border-l-4 border-blue-600 pl-6">
-              <p className="text-sm text-gray-600 mb-1">Consumo Urbano</p>
-              <p className="text-3xl font-bold text-gray-900">
-                {car.consumo_urbano}
-              </p>
-            </div>
-
-            <div className="border-l-4 border-blue-600 pl-6">
-              <p className="text-sm text-gray-600 mb-1">Consumo en Ruta</p>
-              <p className="text-3xl font-bold text-gray-900">
-                {car.consumo_ruta}
-              </p>
-            </div>
-
-            <div className="border-l-4 border-blue-600 pl-6">
-              <p className="text-sm text-gray-600 mb-1">Consumo Mixto</p>
-              <p className="text-3xl font-bold text-gray-900">
-                {car.consumo_mixto}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Dimensiones */}
-        <div className="bg-gray-50 p-8 rounded-xl mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8">Dimensiones</h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-            <div className="bg-white p-6 rounded-lg shadow-sm">
-              <p className="text-sm text-gray-600 mb-2">Largo</p>
-              <p className="text-2xl font-bold text-gray-900">{car.largo}</p>
-            </div>
-
-            <div className="bg-white p-6 rounded-lg shadow-sm">
-              <p className="text-sm text-gray-600 mb-2">Ancho</p>
-              <p className="text-2xl font-bold text-gray-900">{car.ancho}</p>
-            </div>
-
-            <div className="bg-white p-6 rounded-lg shadow-sm">
-              <p className="text-sm text-gray-600 mb-2">Alto</p>
-              <p className="text-2xl font-bold text-gray-900">{car.alto}</p>
-            </div>
-
-            <div className="bg-white p-6 rounded-lg shadow-sm">
-              <p className="text-sm text-gray-600 mb-2">Peso</p>
-              <p className="text-2xl font-bold text-gray-900">{car.peso}</p>
-            </div>
-
-            <div className="bg-white p-6 rounded-lg shadow-sm">
-              <p className="text-sm text-gray-600 mb-2">Maletero</p>
-              <p className="text-2xl font-bold text-gray-900">{car.maletero}</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Capacidades */}
-        <div className="bg-white border border-gray-200 p-8 rounded-xl mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8">Capacidades</h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="border-l-4 border-blue-600 pl-6">
-              <p className="text-sm text-gray-600 mb-1">Pasajeros</p>
-              <p className="text-3xl font-bold text-gray-900">
-                {car.pasajeros}
-              </p>
-            </div>
-
-            <div className="border-l-4 border-blue-600 pl-6">
-              <p className="text-sm text-gray-600 mb-1">Capacidad Tanque</p>
-              <p className="text-3xl font-bold text-gray-900">{car.tanque}</p>
-            </div>
-
-            <div className="border-l-4 border-blue-600 pl-6">
-              <p className="text-sm text-gray-600 mb-1">Aceleración 0-100</p>
-              <p className="text-3xl font-bold text-gray-900">
-                {car.aceleracion}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Equipamiento */}
-        {car.equipamiento && car.equipamiento.length > 0 && (
-          <div className="bg-gray-50 p-8 rounded-xl mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-8">
-              Equipamiento
-            </h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {car.equipamiento.map((item, index) => (
-                <div
-                  key={index}
-                  className="flex items-center bg-white p-4 rounded-lg shadow-sm"
-                >
-                  <div className="text-blue-600 text-2xl mr-4">✓</div>
-                  <p className="text-gray-700 font-medium">{item}</p>
-                </div>
-              ))}
-            </div>
-          </div>
         )}
 
-        {/* Seguridad */}
-        {car.seguridad && car.seguridad.length > 0 && (
-          <div className="bg-white border border-gray-200 p-8 rounded-xl mb-12">
+        {car.category === 'MAQUINARIA' && (
+            <div className="bg-gray-50 p-8 rounded-xl mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-8">
-              Características de Seguridad
+                Ficha Técnica Maquinaria
             </h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {car.seguridad.map((item, index) => (
-                <div
-                  key={index}
-                  className="flex items-center bg-gray-50 p-4 rounded-lg"
-                >
-                  <div className="text-green-600 text-2xl mr-4">🛡️</div>
-                  <p className="text-gray-700 font-medium">{item}</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="bg-white p-6 rounded-lg shadow-sm">
+                    <h3 className="text-sm font-semibold text-gray-600 mb-2">HORAS</h3>
+                    <p className="text-lg font-bold text-gray-900">{car.horas || '0'} hs</p>
                 </div>
-              ))}
+                 <div className="bg-white p-6 rounded-lg shadow-sm">
+                    <h3 className="text-sm font-semibold text-gray-600 mb-2">AÑO</h3>
+                    <p className="text-lg font-bold text-gray-900">{car.year || 'N/A'}</p>
+                </div>
+                 <div className="bg-white p-6 rounded-lg shadow-sm">
+                    <h3 className="text-sm font-semibold text-gray-600 mb-2">TRACCIÓN</h3>
+                    <p className="text-lg font-bold text-gray-900">{car.traccion || 'N/A'}</p>
+                </div>
             </div>
-          </div>
+            </div>
         )}
+        
+        {car.category === 'HERRAMIENTA' && (
+            <div className="bg-gray-50 p-8 rounded-xl mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-8">
+                Detalles
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="bg-white p-6 rounded-lg shadow-sm">
+                    <h3 className="text-sm font-semibold text-gray-600 mb-2">CONDICIÓN</h3>
+                    <p className="text-lg font-bold text-gray-900">{car.condicion || 'N/A'}</p>
+                </div>
+                 <div className="bg-white p-6 rounded-lg shadow-sm">
+                    <h3 className="text-sm font-semibold text-gray-600 mb-2">MARCA</h3>
+                    <p className="text-lg font-bold text-gray-900">{car.marca || 'N/A'}</p>
+                </div>
+            </div>
+            </div>
+        )}
+
+        {/* Equipamiento (si existe en specs, aunque es array, aquí asumimos simple para demo) */}
+        {/* Simplemente mostramos JSON crudamente formateado si es complejo, o asumimos estructura previa */}
 
         {/* CTA Final */}
         <div className="bg-blue-600 text-white p-12 rounded-xl text-center">
-          <h2 className="text-3xl font-bold mb-4">¿Te interesa este auto?</h2>
+          <h2 className="text-3xl font-bold mb-4">¿Te interesa?</h2>
           <p className="text-xl text-blue-100 mb-8">
-            Contacta con nuestros asesores ahora y obtén una prueba de manejo
-            gratuita
+            Contacta con nuestros asesores ahora.
           </p>
           <a
             href="https://api.whatsapp.com/send/?phone=543465668393&text=Holaa+Quiero+hacer+una+consulta&type=phone_number&app_absent=0"
@@ -493,7 +392,7 @@ export default function CarDetail() {
         {relatedCars.length > 0 && (
           <div className="mt-16 border-t pt-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-8">
-              Autos Relacionados
+              Relacionados
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {relatedCars.map((related) => {

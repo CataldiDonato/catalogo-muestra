@@ -56,9 +56,9 @@ const initializeDatabase = async () => {
     await dbClient.connect();
     console.log("✓ Conectado a la base de datos");
 
-    // Verificar si la tabla vehicles existe
+    // Verificar si la tabla publications existe
     const tableCheck = await dbClient.query(
-      `SELECT 1 FROM information_schema.tables WHERE table_name = 'vehicles'`
+      `SELECT 1 FROM information_schema.tables WHERE table_name = 'publications'`
     );
 
     if (tableCheck.rows.length === 0) {
@@ -70,21 +70,21 @@ const initializeDatabase = async () => {
       console.log("📚 Cargando datos de prueba...");
       const seedSQL = readSQLFile("seed.sql");
       await dbClient.query(seedSQL);
-      console.log("✓ Datos cargados (12 vehículos)");
+      console.log("✓ Datos cargados");
     } else {
       console.log("✓ Tablas ya existen");
 
       // Verificar si hay datos
-      const dataCheck = await dbClient.query("SELECT COUNT(*) FROM vehicles");
+      const dataCheck = await dbClient.query("SELECT COUNT(*) FROM publications");
       const count = dataCheck.rows[0].count;
 
       if (count === 0) {
         console.log("📚 Cargando datos de prueba...");
         const seedSQL = readSQLFile("seed.sql");
         await dbClient.query(seedSQL);
-        console.log("✓ Datos cargados (12 vehículos)");
+        console.log("✓ Datos cargados");
       } else {
-        console.log(`✓ Base de datos lista (${count} vehículos)`);
+        console.log(`✓ Base de datos lista (${count} publicaciones)`);
       }
     }
 

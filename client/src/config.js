@@ -15,15 +15,18 @@ export const API_ENDPOINTS = {
   REGISTER: `${API_BASE_URL}/api/auth/register`,
   LOGIN: `${API_BASE_URL}/api/auth/login`,
 
-  // Vehículos
-  VEHICLES: `${API_BASE_URL}/api/vehicles`,
-  VEHICLE_DETAIL: (id) => `${API_BASE_URL}/api/vehicles/${id}`,
+  // Publicaciones (Antes Vehículos)
+  PUBLICATIONS: `${API_BASE_URL}/api/publications`,
+  PUBLICATION_DETAIL: (id) => `${API_BASE_URL}/api/publications/${id}`,
 
   // Uploads
   UPLOAD: `${API_BASE_URL}/api/upload`,
 
   // Contacto
   CONTACT: `${API_BASE_URL}/api/contact`,
+  
+  // Bot Parser
+  BOT_PARSE: `${API_BASE_URL}/api/bot/parse`
 };
 
 export default API_ENDPOINTS;

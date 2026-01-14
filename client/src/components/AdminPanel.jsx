@@ -19,34 +19,37 @@ export default function AdminPanel() {
     maxPrice: "",
     year: "",
     search: "",
+    category: "",
   });
 
   const [formData, setFormData] = useState({
-    brand: "",
-    model: "",
-    year: new Date().getFullYear(),
+    title: "", // Título genérico si se necesita, o se arma desde brand/model
+    category: "VEHICULO", // Default category
     price: "",
     images: [],
     imagePreviews: [],
     description: "",
+    
+    // CAMPOS ESPECÍFICOS (Se mapean a specs)
+    // VEHICULO
+    brand: "",
+    model: "",
+    year: new Date().getFullYear(),
+    km: "",
+    transmision: "",
+    combustible: "",
     motor: "",
     potencia: "",
-    torque: "",
-    combustible: "",
-    transmision: "",
-    traccion: "",
-    consumo_urbano: "",
-    consumo_ruta: "",
-    consumo_mixto: "",
-    largo: "",
-    ancho: "",
-    alto: "",
-    peso: "",
-    cilindrada: "",
-    aceleracion: "",
-    velocidad_maxima: "",
-    tanque: "",
-    maletero: "",
+    
+    // MAQUINARIA
+    horas: "",
+    // Usamos 'potencia' y 'year' compartidos o específicos si se prefiere
+    
+    // HERRAMIENTA
+    condicion: "Nuevo", // Nuevo/Usado
+    marca: "", 
+    
+    // Generales extras
     equipamiento: "",
     seguridad: "",
   });
@@ -70,35 +73,41 @@ export default function AdminPanel() {
   const applyFilters = () => {
     let filtered = vehicles;
 
-    // Filtro por búsqueda (marca, modelo)
+    // Filtro por búsqueda (marca, modelo, titulo)
     if (filters.search) {
       const searchLower = filters.search.toLowerCase();
       filtered = filtered.filter(
         (v) =>
-          v.brand.toLowerCase().includes(searchLower) ||
-          v.model.toLowerCase().includes(searchLower)
+          (v.title && v.title.toLowerCase().includes(searchLower)) ||
+          (v.specs && v.specs.brand && v.specs.brand.toLowerCase().includes(searchLower)) ||
+          (v.specs && v.specs.model && v.specs.model.toLowerCase().includes(searchLower))
       );
     }
 
-    // Filtro por marca
+    // Filtro por marca (desde specs)
     if (filters.brand) {
-      filtered = filtered.filter((v) => v.brand === filters.brand);
+      filtered = filtered.filter((v) => v.specs && v.specs.brand === filters.brand);
+    }
+    
+    // Filtro por categoría
+    if (filters.category) {
+        filtered = filtered.filter((v) => v.category === filters.category);
     }
 
-    // Filtro por año
+    // Filtro por año (desde specs)
     if (filters.year) {
-      filtered = filtered.filter((v) => v.year === parseInt(filters.year));
+      filtered = filtered.filter((v) => v.specs && v.specs.year === parseInt(filters.year));
     }
 
     // Filtro por rango de precio
     if (filters.minPrice) {
       filtered = filtered.filter(
-        (v) => v.price >= parseFloat(filters.minPrice)
+        (v) => Number(v.price) >= parseFloat(filters.minPrice)
       );
     }
     if (filters.maxPrice) {
       filtered = filtered.filter(
-        (v) => v.price <= parseFloat(filters.maxPrice)
+        (v) => Number(v.price) <= parseFloat(filters.maxPrice)
       );
     }
 
@@ -120,17 +129,18 @@ export default function AdminPanel() {
       maxPrice: "",
       year: "",
       search: "",
+      category: "",
     });
   };
 
   const fetchVehicles = async (authToken) => {
     try {
       setLoading(true);
-      const response = await fetch(API_ENDPOINTS.VEHICLES);
+      const response = await fetch(API_ENDPOINTS.PUBLICATIONS);
       const data = await response.json();
       setVehicles(data);
     } catch (err) {
-      setError("Error al cargar vehículos");
+      setError("Error al cargar publicaciones");
       console.error(err);
     } finally {
       setLoading(false);
@@ -239,28 +249,58 @@ export default function AdminPanel() {
         return;
       }
 
+      // PREPARAR EL PAYLOAD (Empaquetar specs según categoría)
+      const specs = {};
+      let title = formData.title;
+
+      if (formData.category === 'VEHICULO') {
+          specs.brand = formData.brand;
+          specs.model = formData.model;
+          specs.year = parseInt(formData.year);
+          specs.km = parseInt(formData.km);
+          specs.transmision = formData.transmision;
+          specs.combustible = formData.combustible;
+          specs.motor = formData.motor;
+          specs.potencia = formData.potencia;
+          // Construir título si está vacío
+          if (!title) title = `${specs.brand} ${specs.model} ${specs.year}`;
+      } else if (formData.category === 'MAQUINARIA') {
+          specs.brand = formData.brand; // Usamos campo 'brand' para 'marca' genérica si queremos
+          specs.model = formData.model;
+          specs.year = parseInt(formData.year);
+          specs.horas = parseInt(formData.horas);
+          specs.potencia = parseInt(formData.potencia); // Asumimos HP numérico
+           // Construir título si está vacío
+          if (!title) title = `${specs.brand || 'Maquinaria'} ${specs.model || ''} - ${specs.horas} hs`;
+      } else if (formData.category === 'HERRAMIENTA') {
+          specs.condicion = formData.condicion;
+          specs.marca = formData.marca;
+          // Construir título si está vacío
+          if (!title && formData.marca) title = `${formData.marca} - ${formData.condicion}`;
+          else if (!title) title = "Herramienta";
+      }
+
+      // Campos comunes extras
+       specs.equipamiento = formData.equipamiento
+          ? formData.equipamiento.split(",").map((s) => s.trim()).filter((s) => s)
+          : [];
+       specs.seguridad = formData.seguridad
+          ? formData.seguridad.split(",").map((s) => s.trim()).filter((s) => s)
+          : [];
+
       const payload = {
-        ...formData,
-        year: parseInt(formData.year),
+        title: title,
         price: parseFloat(formData.price),
+        currency: 'USD',
+        description: formData.description,
+        category: formData.category,
         images: imagePaths,
-        equipamiento: formData.equipamiento
-          .split(",")
-          .map((s) => s.trim())
-          .filter((s) => s),
-        seguridad: formData.seguridad
-          .split(",")
-          .map((s) => s.trim())
-          .filter((s) => s),
+        specs: specs, // Enviar specs como objeto anidado, ya que el server lo espera así
       };
 
-      // Eliminar campos que no necesitamos enviar
-      delete payload.image_url;
-      delete payload.imagePreviews;
-
       const endpoint = editingId
-        ? API_ENDPOINTS.VEHICLE_DETAIL(editingId)
-        : API_ENDPOINTS.VEHICLES;
+        ? API_ENDPOINTS.PUBLICATION_DETAIL(editingId)
+        : API_ENDPOINTS.PUBLICATIONS;
 
       const method = editingId ? "PUT" : "POST";
 
@@ -290,11 +330,11 @@ export default function AdminPanel() {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("¿Estás seguro de que quieres eliminar este vehículo?"))
+    if (!window.confirm("¿Estás seguro de que quieres eliminar esta publicación?"))
       return;
 
     try {
-      const response = await fetch(API_ENDPOINTS.VEHICLE_DETAIL(id), {
+      const response = await fetch(API_ENDPOINTS.PUBLICATION_DETAIL(id), {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -308,7 +348,7 @@ export default function AdminPanel() {
         return;
       }
 
-      setSuccess("Vehículo eliminado exitosamente");
+      setSuccess("Publicación eliminada exitosamente");
       fetchVehicles(token);
     } catch (err) {
       setError("Error de conexión");
@@ -316,15 +356,17 @@ export default function AdminPanel() {
     }
   };
 
-  const handleEdit = (vehicle) => {
+  const handleEdit = (pub) => {
+    // Desempaquetar specs al form data flat
+    const specs = pub.specs || {};
+    
     setFormData({
-      brand: vehicle.brand,
-      model: vehicle.model,
-      year: vehicle.year,
-      price: vehicle.price,
+      title: pub.title || "",
+      category: pub.category,
+      price: pub.price,
       images: [],
-      imagePreviews: vehicle.images
-        ? vehicle.images
+      imagePreviews: pub.images
+        ? pub.images
             .sort((a, b) => a.position - b.position)
             .map((img) => ({
               file: null,
@@ -332,38 +374,36 @@ export default function AdminPanel() {
               isCover: img.is_cover,
             }))
         : [],
-      description: vehicle.description,
-      motor: vehicle.motor || "",
-      potencia: vehicle.potencia || "",
-      torque: vehicle.torque || "",
-      combustible: vehicle.combustible || "",
-      transmision: vehicle.transmision || "",
-      traccion: vehicle.traccion || "",
-      consumo_urbano: vehicle.consumo_urbano || "",
-      consumo_ruta: vehicle.consumo_ruta || "",
-      consumo_mixto: vehicle.consumo_mixto || "",
-      largo: vehicle.largo || "",
-      ancho: vehicle.ancho || "",
-      alto: vehicle.alto || "",
-      peso: vehicle.peso || "",
-      cilindrada: vehicle.cilindrada || "",
-      aceleracion: vehicle.aceleracion || "",
-      velocidad_maxima: vehicle.velocidad_maxima || "",
-      tanque: vehicle.tanque || "",
-      maletero: vehicle.maletero || "",
-      equipamiento: Array.isArray(vehicle.equipamiento)
-        ? vehicle.equipamiento.join(", ")
+      description: pub.description,
+      
+      // Mapeo inverso de specs
+      brand: specs.brand || specs.marca || "",
+      model: specs.model || "",
+      year: specs.year || "",
+      km: specs.km || "",
+      transmision: specs.transmision || "",
+      combustible: specs.combustible || "",
+      motor: specs.motor || "",
+      potencia: specs.potencia || "",
+      horas: specs.horas || "",
+      condicion: specs.condicion || "Nuevo",
+      marca: specs.brand || specs.marca || "", // Redundancia para herramienta
+
+      equipamiento: Array.isArray(specs.equipamiento)
+        ? specs.equipamiento.join(", ")
         : "",
-      seguridad: Array.isArray(vehicle.seguridad)
-        ? vehicle.seguridad.join(", ")
+      seguridad: Array.isArray(specs.seguridad)
+        ? specs.seguridad.join(", ")
         : "",
     });
-    setEditingId(vehicle.id);
+    setEditingId(pub.id);
     setShowModal(true);
   };
 
   const resetForm = () => {
     setFormData({
+      title: "",
+      category: "VEHICULO",
       brand: "",
       model: "",
       year: new Date().getFullYear(),
@@ -371,30 +411,21 @@ export default function AdminPanel() {
       images: [],
       imagePreviews: [],
       description: "",
+      km: "",
       motor: "",
       potencia: "",
-      torque: "",
       combustible: "",
       transmision: "",
-      traccion: "",
-      consumo_urbano: "",
-      consumo_ruta: "",
-      consumo_mixto: "",
-      largo: "",
-      ancho: "",
-      alto: "",
-      peso: "",
-      cilindrada: "",
-      aceleracion: "",
-      velocidad_maxima: "",
-      tanque: "",
-      maletero: "",
+      horas: "",
+      condicion: "Nuevo",
+      marca: "",
       equipamiento: "",
       seguridad: "",
     });
     setEditingId(null);
     setShowModal(false);
     setError("");
+    setSuccess("");
   };
 
   const handleLogout = () => {
@@ -420,13 +451,6 @@ export default function AdminPanel() {
       </div>
     );
   }
-
-  const getCoverImage = () => {
-    if (formData.imagePreviews.length > 0) {
-      return formData.imagePreviews[0].preview;
-    }
-    return null;
-  };
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -462,16 +486,16 @@ export default function AdminPanel() {
           }}
           className="mb-6 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
         >
-          + Agregar Nuevo Vehículo
+          + Nueva Publicación
         </button>
 
         {/* MODAL FLOTANTE */}
         {showModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg shadow-2xl w-full max-w-2xl max-h-screen overflow-y-auto">
-              <div className="sticky top-0 bg-blue-600 text-white p-6 flex justify-between items-center">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+            <div className="bg-white rounded-lg shadow-2xl w-full max-w-3xl my-8">
+              <div className="sticky top-0 bg-blue-600 text-white p-6 flex justify-between items-center rounded-t-lg z-10">
                 <h2 className="text-2xl font-bold">
-                  {editingId ? "Editar Vehículo" : "Nuevo Vehículo"}
+                  {editingId ? "Editar Publicación" : "Nueva Publicación"}
                 </h2>
                 <button
                   onClick={resetForm}
@@ -481,46 +505,41 @@ export default function AdminPanel() {
                 </button>
               </div>
 
-              <form onSubmit={handleSubmit} className="p-6 space-y-4">
+              <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
+                {/* SELECTOR CATEGORÍA */}
+                <div className="mb-4">
+                    <label className="block font-bold mb-2 text-lg text-blue-700">Tipo de Publicación</label>
+                    <select
+                        name="category"
+                        value={formData.category}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 border-2 border-blue-200 rounded-lg text-lg focus:border-blue-500 outline-none"
+                    >
+                        <option value="VEHICULO">Vehículo</option>
+                        <option value="MAQUINARIA">Maquinaria Agrícola</option>
+                        <option value="HERRAMIENTA">Herramienta</option>
+                    </select>
+                </div>
+                
+                <hr className="my-4"/>
+
+                {/* CAMPOS DINÁMICOS */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block font-bold mb-2">Marca</label>
-                    <input
+                  
+                  {/* Título y Precio (Comunes) */}
+                  <div className="md:col-span-2">
+                     <label className="block font-bold mb-2">Título (Opcional - se genera automático)</label>
+                     <input
                       type="text"
-                      name="brand"
-                      value={formData.brand}
+                      name="title"
+                      value={formData.title}
                       onChange={handleChange}
-                      required
                       className="w-full px-3 py-2 border border-gray-300 rounded"
-                    />
+                      placeholder="Ej: Toyota Hilux 2021..."
+                     />
                   </div>
-
-                  <div>
-                    <label className="block font-bold mb-2">Modelo</label>
-                    <input
-                      type="text"
-                      name="model"
-                      value={formData.model}
-                      onChange={handleChange}
-                      required
-                      className="w-full px-3 py-2 border border-gray-300 rounded"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block font-bold mb-2">Año</label>
-                    <input
-                      type="number"
-                      name="year"
-                      value={formData.year}
-                      onChange={handleChange}
-                      required
-                      className="w-full px-3 py-2 border border-gray-300 rounded"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block font-bold mb-2">Precio</label>
+                   <div>
+                    <label className="block font-bold mb-2">Precio (USD)</label>
                     <input
                       type="number"
                       name="price"
@@ -531,10 +550,92 @@ export default function AdminPanel() {
                       className="w-full px-3 py-2 border border-gray-300 rounded"
                     />
                   </div>
+                  
+                  {/* --- VEHÍCULO --- */}
+                  {formData.category === 'VEHICULO' && (
+                  <>
+                      <div>
+                        <label className="block font-bold mb-2">Marca</label>
+                        <input type="text" name="brand" value={formData.brand} onChange={handleChange} required className="w-full px-3 py-2 border border-gray-300 rounded" />
+                      </div>
+                      <div>
+                        <label className="block font-bold mb-2">Modelo</label>
+                        <input type="text" name="model" value={formData.model} onChange={handleChange} required className="w-full px-3 py-2 border border-gray-300 rounded" />
+                      </div>
+                      <div>
+                        <label className="block font-bold mb-2">Año</label>
+                        <input type="number" name="year" value={formData.year} onChange={handleChange} required className="w-full px-3 py-2 border border-gray-300 rounded" />
+                      </div>
+                       <div>
+                        <label className="block font-bold mb-2">Kilómetros</label>
+                        <input type="number" name="km" value={formData.km} onChange={handleChange} required className="w-full px-3 py-2 border border-gray-300 rounded" />
+                      </div>
+                      <div>
+                        <label className="block font-bold mb-2">Transmisión</label>
+                         <select name="transmision" value={formData.transmision} onChange={handleChange} className="w-full px-3 py-2 border border-gray-300 rounded">
+                            <option value="">Seleccionar...</option>
+                            <option value="Manual">Manual</option>
+                            <option value="Automática">Automática</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block font-bold mb-2">Combustible</label>
+                         <select name="combustible" value={formData.combustible} onChange={handleChange} className="w-full px-3 py-2 border border-gray-300 rounded">
+                             <option value="">Seleccionar...</option>
+                            <option value="Nafta">Nafta</option>
+                            <option value="Diesel">Diesel</option>
+                            <option value="Híbrido">Híbrido</option>
+                        </select>
+                      </div>
+                  </>
+                  )}
+
+                  {/* --- MAQUINARIA --- */}
+                  {formData.category === 'MAQUINARIA' && (
+                  <>
+                       <div>
+                        <label className="block font-bold mb-2">Marca</label>
+                        <input type="text" name="brand" value={formData.brand} onChange={handleChange} required className="w-full px-3 py-2 border border-gray-300 rounded" />
+                      </div>
+                      <div>
+                        <label className="block font-bold mb-2">Modelo</label>
+                        <input type="text" name="model" value={formData.model} onChange={handleChange} required className="w-full px-3 py-2 border border-gray-300 rounded" />
+                      </div>
+                       <div>
+                        <label className="block font-bold mb-2">Año</label>
+                        <input type="number" name="year" value={formData.year} onChange={handleChange} required className="w-full px-3 py-2 border border-gray-300 rounded" />
+                      </div>
+                      <div>
+                        <label className="block font-bold mb-2">Horas de Uso</label>
+                        <input type="number" name="horas" value={formData.horas} onChange={handleChange} required className="w-full px-3 py-2 border border-gray-300 rounded" placeholder="Ej: 5000" />
+                      </div>
+                      <div>
+                        <label className="block font-bold mb-2">Potencia (HP)</label>
+                        <input type="number" name="potencia" value={formData.potencia} onChange={handleChange} className="w-full px-3 py-2 border border-gray-300 rounded" placeholder="Ej: 180"/>
+                      </div>
+                  </>
+                  )}
+
+                  {/* --- HERRAMIENTA --- */}
+                  {formData.category === 'HERRAMIENTA' && (
+                   <>
+                      <div>
+                        <label className="block font-bold mb-2">Marca / Fabricante</label>
+                        <input type="text" name="marca" value={formData.marca} onChange={handleChange} className="w-full px-3 py-2 border border-gray-300 rounded" />
+                      </div>
+                       <div>
+                        <label className="block font-bold mb-2">Condición</label>
+                         <select name="condicion" value={formData.condicion} onChange={handleChange} className="w-full px-3 py-2 border border-gray-300 rounded">
+                            <option value="Nuevo">Nuevo</option>
+                            <option value="Usado">Usado</option>
+                        </select>
+                      </div>
+                   </>
+                  )}
 
                   <div className="md:col-span-2">
                     <label className="block font-bold mb-2">
-                      🖼️ Fotos del Auto (La primera será la portada)
+                      🖼️ Imágenes
                     </label>
                     <input
                       type="file"
@@ -543,18 +644,10 @@ export default function AdminPanel() {
                       onChange={handleImageChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded"
                     />
-                    <p className="text-sm text-gray-600 mt-2">
-                      Selecciona una o varias imágenes. La primera será mostrada
-                      como portada.
-                    </p>
                   </div>
 
                   {formData.imagePreviews.length > 0 && (
                     <div className="md:col-span-2">
-                      <label className="block font-bold mb-2">
-                        Vista previa de imágenes (
-                        {formData.imagePreviews.length})
-                      </label>
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                         {formData.imagePreviews.map((preview, index) => (
                           <div key={index} className="relative group">
@@ -594,76 +687,12 @@ export default function AdminPanel() {
                       className="w-full px-3 py-2 border border-gray-300 rounded"
                     ></textarea>
                   </div>
-
-                  <div>
-                    <label className="block font-bold mb-2">Motor</label>
-                    <input
-                      type="text"
-                      name="motor"
-                      value={formData.motor}
-                      onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block font-bold mb-2">Potencia</label>
-                    <input
-                      type="text"
-                      name="potencia"
-                      value={formData.potencia}
-                      onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block font-bold mb-2">Torque</label>
-                    <input
-                      type="text"
-                      name="torque"
-                      value={formData.torque}
-                      onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block font-bold mb-2">Combustible</label>
-                    <input
-                      type="text"
-                      name="combustible"
-                      value={formData.combustible}
-                      onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block font-bold mb-2">Transmisión</label>
-                    <input
-                      type="text"
-                      name="transmision"
-                      value={formData.transmision}
-                      onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block font-bold mb-2">Tracción</label>
-                    <input
-                      type="text"
-                      name="traccion"
-                      value={formData.traccion}
-                      onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded"
-                    />
-                  </div>
-
+                  
+                  {/* Extras solo para Vehiculo/Maquinaria opcionalmente */}
+                  {(formData.category === 'VEHICULO' || formData.category === 'MAQUINARIA') && (
                   <div className="md:col-span-2">
                     <label className="block font-bold mb-2">
-                      Equipamiento (separado por comas)
+                      Equipamiento / Extras (separado por comas)
                     </label>
                     <textarea
                       name="equipamiento"
@@ -671,23 +700,10 @@ export default function AdminPanel() {
                       onChange={handleChange}
                       rows="2"
                       className="w-full px-3 py-2 border border-gray-300 rounded"
-                      placeholder="Aire acondicionado, Dirección hidráulica, Elevalunas eléctricos"
+                      placeholder="Ej: Radio, GPS, Aire acondicionado"
                     ></textarea>
                   </div>
-
-                  <div className="md:col-span-2">
-                    <label className="block font-bold mb-2">
-                      Seguridad (separado por comas)
-                    </label>
-                    <textarea
-                      name="seguridad"
-                      value={formData.seguridad}
-                      onChange={handleChange}
-                      rows="2"
-                      className="w-full px-3 py-2 border border-gray-300 rounded"
-                      placeholder="ABS, Airbags, Control de estabilidad"
-                    ></textarea>
-                  </div>
+                  )}
                 </div>
 
                 <div className="flex gap-4 justify-end pt-6 border-t">
@@ -703,12 +719,8 @@ export default function AdminPanel() {
                     disabled={uploadingImages}
                     className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-bold py-2 px-6 rounded"
                   >
-                    {uploadingImages
-                      ? "Subiendo imágenes..."
-                      : editingId
-                      ? "Actualizar"
-                      : "Crear"}{" "}
-                    Vehículo
+                    {uploadingImages ? "Subiendo..." : editingId ? "Actualizar" : "Crear"}{" "}
+                    Publicación
                   </button>
                 </div>
               </form>
@@ -718,8 +730,17 @@ export default function AdminPanel() {
 
         {/* FILTROS */}
         <div className="bg-white p-6 rounded-lg shadow-lg mb-6">
-          <h3 className="text-xl font-bold mb-4">🔍 Filtros de Búsqueda</h3>
+          <h3 className="text-xl font-bold mb-4">🔍 Filtros</h3>
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+             <div>
+              <label className="block font-bold mb-2">Categoría</label>
+              <select name="category" value={filters.category} onChange={handleFilterChange} className="w-full px-3 py-2 border border-gray-300 rounded">
+                  <option value="">Todas</option>
+                  <option value="VEHICULO">Vehículos</option>
+                  <option value="MAQUINARIA">Maquinaria</option>
+                  <option value="HERRAMIENTA">Herramientas</option>
+              </select>
+            </div>
             <div>
               <label className="block font-bold mb-2">Buscar</label>
               <input
@@ -727,148 +748,108 @@ export default function AdminPanel() {
                 name="search"
                 value={filters.search}
                 onChange={handleFilterChange}
-                placeholder="Marca o modelo..."
+                placeholder="Nombre, marca..."
                 className="w-full px-3 py-2 border border-gray-300 rounded"
               />
             </div>
-
-            <div>
-              <label className="block font-bold mb-2">Marca</label>
-              <select
-                name="brand"
-                value={filters.brand}
-                onChange={handleFilterChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded"
-              >
-                <option value="">Todas</option>
-                {[...new Set(vehicles.map((v) => v.brand))].map((brand) => (
-                  <option key={brand} value={brand}>
-                    {brand}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block font-bold mb-2">Año</label>
-              <select
-                name="year"
-                value={filters.year}
-                onChange={handleFilterChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded"
-              >
-                <option value="">Todos</option>
-                {[...new Set(vehicles.map((v) => v.year))]
-                  .sort()
-                  .reverse()
-                  .map((year) => (
-                    <option key={year} value={year}>
-                      {year}
-                    </option>
-                  ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block font-bold mb-2">Precio Mínimo</label>
-              <input
-                type="number"
-                name="minPrice"
-                value={filters.minPrice}
-                onChange={handleFilterChange}
-                placeholder="0"
-                className="w-full px-3 py-2 border border-gray-300 rounded"
-              />
-            </div>
-
-            <div>
-              <label className="block font-bold mb-2">Precio Máximo</label>
+            {/* ... Resto de filtros simplificados ... */}
+             <div>
+              <label className="block font-bold mb-2">Precio Máx</label>
               <input
                 type="number"
                 name="maxPrice"
                 value={filters.maxPrice}
                 onChange={handleFilterChange}
-                placeholder="999999"
                 className="w-full px-3 py-2 border border-gray-300 rounded"
               />
             </div>
           </div>
-
-          <div className="mt-4 flex gap-2">
-            <button
-              onClick={resetFilters}
-              className="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded"
-            >
-              Limpiar Filtros
-            </button>
-            <span className="text-gray-700 font-bold py-2 px-4">
-              {filteredVehicles.length} vehículo(s) encontrado(s)
-            </span>
-          </div>
+           <button onClick={resetFilters} className="mt-4 bg-gray-400 text-white px-4 py-2 rounded">Limpiar</button>
         </div>
 
-        <h2 className="text-2xl font-bold mb-4">Vehículos Registrados</h2>
-        {loading ? (
-          <p className="text-gray-600">Cargando...</p>
-        ) : filteredVehicles.length === 0 ? (
-          <p className="text-gray-600">
-            {vehicles.length === 0
-              ? "No hay vehículos registrados aún."
-              : "No hay vehículos que coincidan con los filtros."}
-          </p>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {filteredVehicles.map((vehicle) => {
-              const coverImage = vehicle.images
-                ? vehicle.images.find((img) => img.is_cover)?.image_path ||
-                  vehicle.images[0]?.image_path
-                : null;
-              return (
-                <div
-                  key={vehicle.id}
-                  className="bg-white p-4 rounded-lg shadow-lg"
-                >
-                  {coverImage && (
-                    <img
-                      src={coverImage}
-                      alt={vehicle.model}
-                      className="w-full h-48 object-cover rounded mb-4"
-                    />
-                  )}
-                  <h3 className="text-xl font-bold">
-                    {vehicle.brand} {vehicle.model}
-                  </h3>
-                  <p className="text-gray-600 mb-2">Año: {vehicle.year}</p>
-                  <p className="text-lg font-bold text-blue-600 mb-2">
-                    ${parseFloat(vehicle.price).toLocaleString("es-AR")}
-                  </p>
-                  {vehicle.images && (
-                    <p className="text-sm text-gray-500 mb-2">
-                      📸 {vehicle.images.filter((img) => img).length} fotos
+        {/* TABLA DE RESULTADOS */}
+        <div className="bg-white rounded-lg shadow overflow-hidden">
+             {/* ... Renderizar lista de forma simplificada por ahora ... */}
+            <table className="min-w-full leading-normal">
+            <thead>
+              <tr>
+                <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Foto
+                </th>
+                <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Título / Info
+                </th>
+                <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Categoría
+                </th>
+                <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Precio
+                </th>
+                <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Acciones
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredVehicles.map((vehicle) => (
+                <tr key={vehicle.id}>
+                  <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                    <div className="flex-shrink-0 w-16 h-16">
+                      <img
+                        className="w-full h-full rounded-md object-cover"
+                        src={
+                          (vehicle.images && vehicle.images.length>0 
+                            ? (vehicle.images.find(i=>i.is_cover)?.image_path || vehicle.images[0].image_path) 
+                            : vehicle.image_url) || "https://via.placeholder.com/150"
+                        }
+                        alt=""
+                      />
+                    </div>
+                  </td>
+                  <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                    <p className="text-gray-900 font-bold whitespace-no-wrap">
+                      {vehicle.title || `${vehicle.specs?.brand || ''} ${vehicle.specs?.model || ''}`}
                     </p>
-                  )}
-                  <p className="text-gray-600 mb-4 line-clamp-2">
-                    {vehicle.description}
-                  </p>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => handleEdit(vehicle)}
-                      className="bg-blue-600 hover:bg-blue-700 text-white py-1 px-3 rounded flex-1"
-                    >
-                      Editar
-                    </button>
-                    <button
-                      onClick={() => handleDelete(vehicle.id)}
-                      className="bg-red-600 hover:bg-red-700 text-white py-1 px-3 rounded flex-1"
-                    >
-                      Eliminar
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
+                    <p className="text-gray-600 text-xs">{vehicle.specs?.year || ''}</p>
+                  </td>
+                   <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                    <span className="relative inline-block px-3 py-1 font-semibold text-green-900 leading-tight">
+                      <span
+                        aria-hidden
+                        className="absolute inset-0 bg-green-200 opacity-50 rounded-full"
+                      ></span>
+                      <span className="relative">{vehicle.category}</span>
+                    </span>
+                  </td>
+                  <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                    <p className="text-gray-900 whitespace-no-wrap">
+                      USD {vehicle.price}
+                    </p>
+                  </td>
+                  <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                    <div className="flex gap-2">
+                        <button
+                          onClick={() => handleEdit(vehicle)}
+                          className="text-blue-600 hover:text-blue-900"
+                        >
+                          Editar
+                        </button>
+                        <button
+                          onClick={() => handleDelete(vehicle.id)}
+                          className="text-red-600 hover:text-red-900"
+                        >
+                          Eliminar
+                        </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {filteredVehicles.length === 0 && (
+             <div className="p-4 text-center text-gray-500">No se encontraron publicaciones.</div>
+          )}
+        </div>
       </div>
     </div>
   );

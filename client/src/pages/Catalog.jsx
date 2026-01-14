@@ -16,21 +16,33 @@ export default function Catalog() {
   const [selectedTraction, setSelectedTraction] = useState("todos");
   const [sortBy, setSortBy] = useState("name");
 
-  // Obtener vehículos del backend
+  // Obtener vehículos (ahora publicaciones) del backend
   useEffect(() => {
     const fetchVehicles = async () => {
       try {
         setLoading(true);
-        const response = await fetch(API_ENDPOINTS.VEHICLES);
+        const response = await fetch(API_ENDPOINTS.PUBLICATIONS);
         if (!response.ok) {
-          throw new Error("Error al obtener los vehículos");
+          throw new Error("Error al obtener las publicaciones");
         }
         const data = await response.json();
-        setVehicles(data);
+        
+        // Mapear la estructura nueva a la vieja para compatibilidad
+        // La API devuelve: { id, title, price, description, category, specs: { brand, model... } }
+        // Flatten specs para que el código existente funcione (v.brand, v.model)
+        const mappedData = data.map(item => ({
+             ...item,
+             ...item.specs, // Flatten specs
+             // Asegurar título si brand/model no existen en specs (casos nuevos)
+             brand: item.specs?.brand || (item.title ? item.title.split(' ')[0] : 'Varios'), 
+             model: item.specs?.model || (item.title ? item.title.substring(item.title.indexOf(' ')+1) : ''),
+        }));
+
+        setVehicles(mappedData);
         // Calcular rango de precios máximo
-        const maxPrice = Math.max(...data.map((v) => v.price));
+        const maxPrice = mappedData.length > 0 ? Math.max(...mappedData.map((v) => Number(v.price))) : 100000;
         setPriceRange([0, maxPrice]);
-        setFilteredVehicles(data);
+        setFilteredVehicles(mappedData);
         setError(null);
       } catch (err) {
         console.error("Error:", err);
@@ -57,7 +69,7 @@ export default function Catalog() {
     filtered = filtered.filter(
       (v) => v.price >= priceRange[0] && v.price <= priceRange[1]
     );
-    return ["todos", ...new Set(filtered.map((v) => v.brand))].sort();
+    return ["todos", ...new Set(filtered.map((v) => v.brand).filter(Boolean))].sort();
   };
 
   const getAvailableFuels = () => {
@@ -71,7 +83,7 @@ export default function Catalog() {
     filtered = filtered.filter(
       (v) => v.price >= priceRange[0] && v.price <= priceRange[1]
     );
-    return ["todos", ...new Set(filtered.map((v) => v.combustible))].sort();
+    return ["todos", ...new Set(filtered.map((v) => v.combustible).filter(Boolean))].sort();
   };
 
   const getAvailableTransmissions = () => {
@@ -85,7 +97,7 @@ export default function Catalog() {
     filtered = filtered.filter(
       (v) => v.price >= priceRange[0] && v.price <= priceRange[1]
     );
-    return ["todos", ...new Set(filtered.map((v) => v.transmision))].sort();
+    return ["todos", ...new Set(filtered.map((v) => v.transmision).filter(Boolean))].sort();
   };
 
   const getAvailableTractions = () => {
@@ -99,7 +111,7 @@ export default function Catalog() {
     filtered = filtered.filter(
       (v) => v.price >= priceRange[0] && v.price <= priceRange[1]
     );
-    return ["todos", ...new Set(filtered.map((v) => v.traccion))].sort();
+    return ["todos", ...new Set(filtered.map((v) => v.traccion).filter(Boolean))].sort();
   };
 
   const getMaxPrice = () => {
@@ -113,7 +125,7 @@ export default function Catalog() {
     if (selectedTraction !== "todos")
       filtered = filtered.filter((v) => v.traccion === selectedTraction);
     return filtered.length > 0
-      ? Math.max(...filtered.map((v) => v.price))
+      ? Math.max(...filtered.map((v) => Number(v.price)))
       : 100000;
   };
 
@@ -185,7 +197,7 @@ export default function Catalog() {
     setSelectedTraction("todos");
     setSortBy("name");
     if (vehicles.length > 0) {
-      const maxPrice = Math.max(...vehicles.map((v) => v.price));
+      const maxPrice = Math.max(...vehicles.map((v) => Number(v.price)));
       setPriceRange([0, maxPrice]);
     }
   };
@@ -196,11 +208,11 @@ export default function Catalog() {
         {/* Header */}
         <div className="mb-12">
           <h1 className="text-5xl font-bold text-gray-900 mb-4">
-            Catálogo de Vehículos
+            Catálogo
           </h1>
           <p className="text-xl text-gray-600">
             Disponibles: <span className="font-bold">{vehicles.length}</span>{" "}
-            vehículos
+            publicaciones
           </p>
         </div>
 
@@ -258,6 +270,7 @@ export default function Catalog() {
                 </div>
 
                 {/* Filtro por Combustible */}
+                {fuels.length > 0 && (
                 <div>
                   <label className="block text-sm font-semibold text-gray-900 mb-3">
                     Combustible
@@ -274,8 +287,10 @@ export default function Catalog() {
                     ))}
                   </select>
                 </div>
+                )}
 
                 {/* Filtro por Transmisión */}
+                {transmissions.length > 0 && (
                 <div>
                   <label className="block text-sm font-semibold text-gray-900 mb-3">
                     Transmisión
@@ -292,8 +307,10 @@ export default function Catalog() {
                     ))}
                   </select>
                 </div>
+                )}
 
                 {/* Filtro por Tracción */}
+                {tractions.length > 0 && (
                 <div>
                   <label className="block text-sm font-semibold text-gray-900 mb-3">
                     Tracción
@@ -312,6 +329,7 @@ export default function Catalog() {
                     ))}
                   </select>
                 </div>
+                )}
 
                 {/* Ordenamiento */}
                 <div>
@@ -349,7 +367,7 @@ export default function Catalog() {
                     <span className="font-bold text-gray-900">
                       {vehicles.length}
                     </span>{" "}
-                    autos
+                    items
                   </p>
                 </div>
               </div>
@@ -384,18 +402,18 @@ export default function Catalog() {
             ) : filteredVehicles.length === 0 ? (
               // Empty State
               <div className="bg-gray-50 rounded-xl p-12 text-center">
-                <div className="text-6xl mb-4">🚗</div>
+                <div className="text-6xl mb-4">🔍</div>
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">
                   Sin resultados
                 </h2>
                 <p className="text-gray-600 mb-6">
-                  No encontramos autos que coincidan con tus filtros.
+                  No encontramos items que coincidan con tus filtros.
                 </p>
                 <button
                   onClick={clearFilters}
                   className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition font-semibold"
                 >
-                  Ver Todos los Autos
+                  Ver Todo
                 </button>
               </div>
             ) : (

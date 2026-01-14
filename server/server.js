@@ -8,6 +8,7 @@ const bcrypt = require("bcryptjs");
 const multer = require("multer");
 const initializeDatabase = require("./initDB");
 const authMiddleware = require("./middleware/auth");
+const { parsearTextoIngreso } = require("./utils/parser");
 require("dotenv").config();
 
 const app = express();
@@ -88,7 +89,6 @@ app.post("/api/auth/register", async (req, res) => {
   }
 
   try {
-    // Verificar si el usuario ya existe
     const userExists = await pool.query(
       "SELECT id FROM users WHERE email = $1",
       [email]
@@ -97,10 +97,8 @@ app.post("/api/auth/register", async (req, res) => {
       return res.status(400).json({ error: "El usuario ya existe" });
     }
 
-    // Encriptar contraseña
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Crear usuario
     const result = await pool.query(
       "INSERT INTO users (email, password, name, role) VALUES ($1, $2, $3, $4) RETURNING id, email, name",
       [email, hashedPassword, name, "user"]
@@ -136,13 +134,11 @@ app.post("/api/auth/login", async (req, res) => {
 
     const user = result.rows[0];
 
-    // Verificar contraseña
     const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch) {
       return res.status(401).json({ error: "Credenciales inválidas" });
     }
 
-    // Generar JWT
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role },
       JWT_SECRET,
@@ -166,62 +162,92 @@ app.post("/api/auth/login", async (req, res) => {
   }
 });
 
-// ==================== RUTAS DE VEHÍCULOS ====================
+// ==================== HELPER DE VALIDACIÓN ====================
+const validarSpecs = (category, specs) => {
+  if (!specs || typeof specs !== 'object') return { valid: false, error: "Specs debe ser un objeto JSON" };
+  
+  switch(category) {
+    case 'VEHICULO':
+      if (!specs.km && specs.km !== 0) return { valid: false, error: "Falta 'km' en specs para vehiculo" };
+      if (!specs.year) return { valid: false, error: "Falta 'year' en specs para vehiculo" };
+      break;
+    case 'MAQUINARIA':
+      if (!specs.horas && specs.horas !== 0) return { valid: false, error: "Falta 'horas' en specs para maquinaria" };
+      if (!specs.year) return { valid: false, error: "Falta 'year' en specs para maquinaria" };
+      break;
+    case 'HERRAMIENTA':
+      if (!specs.condicion) return { valid: false, error: "Falta 'condicion' (nuevo/usado) en specs para herramienta" };
+      break;
+    default:
+      // Si la categoría no es válida, lo manejaremos en el controlador
+      return { valid: true }; 
+  }
+  return { valid: true };
+};
 
-// GET /api/vehicles - Obtener todos los autos (Público)
-app.get("/api/vehicles", async (req, res) => {
+// ==================== RUTAS DE PUBLICACIONES (Ex Vehículos) ====================
+
+// GET /api/publications - Obtener todas las publicaciones
+app.get("/api/publications", async (req, res) => {
+  const { category } = req.query; // Filtro opcional
   try {
-    const result = await pool.query(
-      `SELECT v.*, 
-              json_agg(json_build_object('id', vi.id, 'image_path', vi.image_path, 'is_cover', vi.is_cover, 'position', vi.position)) as images
-       FROM vehicles v
-       LEFT JOIN vehicle_images vi ON v.id = vi.vehicle_id
-       GROUP BY v.id
-       ORDER BY v.id ASC`
-    );
+    let queryText = `
+      SELECT p.*, 
+             json_agg(json_build_object('id', pi.id, 'image_path', pi.image_path, 'is_cover', pi.is_cover, 'position', pi.position)) as images
+      FROM publications p
+      LEFT JOIN publication_images pi ON p.id = pi.publication_id
+    `;
+    
+    const queryParams = [];
+    if (category) {
+      queryText += ` WHERE p.category = $1`;
+      queryParams.push(category);
+    }
+
+    queryText += ` GROUP BY p.id ORDER BY p.id ASC`;
+
+    const result = await pool.query(queryText, queryParams);
     res.json(result.rows);
   } catch (err) {
-    console.error("Error al obtener vehículos:", err);
-    res.status(500).json({ error: "Error al obtener vehículos" });
+    console.error("Error al obtener publicaciones:", err);
+    res.status(500).json({ error: "Error al obtener publicaciones" });
   }
 });
 
-// GET /api/vehicles/:id - Obtener un auto específico (Público)
-app.get("/api/vehicles/:id", async (req, res) => {
+// GET /api/publications/:id - Obtener una publicación ID
+app.get("/api/publications/:id", async (req, res) => {
   const { id } = req.params;
 
   try {
     const result = await pool.query(
-      `SELECT v.*, 
-              json_agg(json_build_object('id', vi.id, 'image_path', vi.image_path, 'is_cover', vi.is_cover, 'position', vi.position)) as images
-       FROM vehicles v
-       LEFT JOIN vehicle_images vi ON v.id = vi.vehicle_id
-       WHERE v.id = $1
-       GROUP BY v.id`,
+      `SELECT p.*, 
+              json_agg(json_build_object('id', pi.id, 'image_path', pi.image_path, 'is_cover', pi.is_cover, 'position', pi.position)) as images
+       FROM publications p
+       LEFT JOIN publication_images pi ON p.id = pi.publication_id
+       WHERE p.id = $1
+       GROUP BY p.id`,
       [id]
     );
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: "Vehículo no encontrado" });
+      return res.status(404).json({ error: "Publicación no encontrada" });
     }
 
     res.json(result.rows[0]);
   } catch (err) {
-    console.error("Error al obtener vehículo:", err);
-    res.status(500).json({ error: "Error al obtener vehículo" });
+    console.error("Error al obtener publicación:", err);
+    res.status(500).json({ error: "Error al obtener publicación" });
   }
 });
 
-// POST /api/contact - Guardar un mensaje de contacto
+// POST /api/contact - Guardar un mensaje
 app.post("/api/contact", async (req, res) => {
   const { name, email, message } = req.body;
 
-  // Validar que los campos requeridos existan
   if (!name || !email || !message) {
     return res.status(400).json({ error: "Todos los campos son requeridos" });
   }
 
-  // Validar formato de email básico
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
     return res.status(400).json({ error: "Email inválido" });
@@ -243,9 +269,19 @@ app.post("/api/contact", async (req, res) => {
   }
 });
 
+// POST /api/bot/parse - Parsear texto del bot
+app.post("/api/bot/parse", (req, res) => {
+  const { text } = req.body;
+  if (!text) return res.status(400).json({ error: "Texto requerido" });
+  
+  const parsedData = parsearTextoIngreso(text);
+  res.json({ success: true, data: parsedData });
+});
+
+
 // ==================== RUTAS CRUD PROTEGIDAS ====================
 
-// POST /api/upload - Cargar imágenes (Protegido)
+// POST /api/upload
 app.post(
   "/api/upload",
   authMiddleware,
@@ -274,171 +310,117 @@ app.post(
   }
 );
 
-// POST /api/vehicles - Crear nuevo vehículo (Protegido)
-app.post("/api/vehicles", authMiddleware, async (req, res) => {
-  const { brand, model, year, price, description, images, ...specs } = req.body;
+// POST /api/publications - Crear nueva publicación
+app.post("/api/publications", authMiddleware, async (req, res) => {
+  // specs es un JSON con los detalles (km, año, horas, etc)
+  const { title, price, currency, description, category, images, specs } = req.body;
 
-  if (
-    !brand ||
-    !model ||
-    !year ||
-    !price ||
-    !description ||
-    !images ||
-    images.length === 0
-  ) {
-    return res.status(400).json({ error: "Campos requeridos faltantes" });
+  if (!title || !price || !category) {
+    return res.status(400).json({ error: "Título, precio y categoría son requeridos" });
+  }
+
+  // Validar specs según categoría
+  const validation = validarSpecs(category, specs);
+  if (!validation.valid) {
+    return res.status(400).json({ error: validation.error });
   }
 
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
 
-    // Crear vehículo
-    const vehicleResult = await client.query(
-      `INSERT INTO vehicles 
-       (brand, model, year, price, description, motor, potencia, torque, 
-        combustible, transmision, traccion, consumo_urbano, consumo_ruta, consumo_mixto, 
-        largo, ancho, alto, peso, cilindrada, aceleracion, velocidad_maxima, tanque, maletero, 
-        equipamiento, seguridad) 
-       VALUES 
-       ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, 
-        $19, $20, $21, $22, $23, $24, $25) 
+    // Insertar Publicación
+    const pubResult = await client.query(
+      `INSERT INTO publications 
+       (title, price, currency, description, category, specs) 
+       VALUES ($1, $2, $3, $4, $5, $6) 
        RETURNING *`,
-      [
-        brand,
-        model,
-        year,
-        price,
-        description,
-        specs.motor,
-        specs.potencia,
-        specs.torque,
-        specs.combustible,
-        specs.transmision,
-        specs.traccion,
-        specs.consumo_urbano,
-        specs.consumo_ruta,
-        specs.consumo_mixto,
-        specs.largo,
-        specs.ancho,
-        specs.alto,
-        specs.peso,
-        specs.cilindrada,
-        specs.aceleracion,
-        specs.velocidad_maxima,
-        specs.tanque,
-        specs.maletero,
-        JSON.stringify(specs.equipamiento || []),
-        JSON.stringify(specs.seguridad || []),
-      ]
+      [title, price, currency || 'USD', description || '', category, JSON.stringify(specs || {})]
     );
 
-    const vehicleId = vehicleResult.rows[0].id;
+    const publicationId = pubResult.rows[0].id;
 
-    // Agregar imágenes
-    const imageArray = Array.isArray(images) ? images : [images];
-    for (let i = 0; i < imageArray.length; i++) {
-      await client.query(
-        `INSERT INTO vehicle_images (vehicle_id, image_path, is_cover, position)
-         VALUES ($1, $2, $3, $4)`,
-        [vehicleId, imageArray[i], i === 0, i]
-      );
+    // Insertar Imágenes
+    if (images && images.length > 0) {
+      const imageArray = Array.isArray(images) ? images : [images];
+      for (let i = 0; i < imageArray.length; i++) {
+        await client.query(
+          `INSERT INTO publication_images (publication_id, image_path, is_cover, position)
+           VALUES ($1, $2, $3, $4)`,
+          [publicationId, imageArray[i], i === 0, i]
+        );
+      }
     }
 
     await client.query("COMMIT");
 
-    // Obtener vehículo con imágenes
-    const vehicleWithImages = await pool.query(
-      `SELECT v.*, 
-              json_agg(json_build_object('id', vi.id, 'image_path', vi.image_path, 'is_cover', vi.is_cover, 'position', vi.position)) as images
-       FROM vehicles v
-       LEFT JOIN vehicle_images vi ON v.id = vi.vehicle_id
-       WHERE v.id = $1
-       GROUP BY v.id`,
-      [vehicleId]
+    // Obtener resultado completo
+    const fullPub = await pool.query(
+      `SELECT p.*, 
+              json_agg(json_build_object('id', pi.id, 'image_path', pi.image_path, 'is_cover', pi.is_cover, 'position', pi.position)) as images
+       FROM publications p
+       LEFT JOIN publication_images pi ON p.id = pi.publication_id
+       WHERE p.id = $1
+       GROUP BY p.id`,
+      [publicationId]
     );
 
     res.status(201).json({
       success: true,
-      message: "Vehículo creado exitosamente",
-      data: vehicleWithImages.rows[0],
+      message: "Publicación creada exitosamente",
+      data: fullPub.rows[0],
     });
   } catch (err) {
     await client.query("ROLLBACK");
-    console.error("Error al crear vehículo:", err);
-    res.status(500).json({ error: "Error al crear vehículo" });
+    console.error("Error al crear publicación:", err);
+    res.status(500).json({ error: "Error al crear publicación" });
   } finally {
     client.release();
   }
 });
 
-// PUT /api/vehicles/:id - Actualizar vehículo (Protegido)
-app.put("/api/vehicles/:id", authMiddleware, async (req, res) => {
+// PUT /api/publications/:id - Actualizar
+app.put("/api/publications/:id", authMiddleware, async (req, res) => {
   const { id } = req.params;
-  const { brand, model, year, price, description, images, ...specs } = req.body;
+  const { title, price, currency, description, category, images, specs } = req.body;
+
+  if (category && specs) {
+     const validation = validarSpecs(category, specs);
+     if (!validation.valid) return res.status(400).json({ error: validation.error });
+  }
 
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
 
-    // Actualizar vehículo
+    // Actualizar datos básicos
     const result = await client.query(
-      `UPDATE vehicles SET 
-       brand = $1, model = $2, year = $3, price = $4, description = $5,
-       motor = $6, potencia = $7, torque = $8, combustible = $9, transmision = $10,
-       traccion = $11, consumo_urbano = $12, consumo_ruta = $13, consumo_mixto = $14,
-       largo = $15, ancho = $16, alto = $17, peso = $18, cilindrada = $19, aceleracion = $20,
-       velocidad_maxima = $21, tanque = $22, maletero = $23, equipamiento = $24, seguridad = $25
-       WHERE id = $26 
+      `UPDATE publications SET 
+       title = COALESCE($1, title), 
+       price = COALESCE($2, price), 
+       currency = COALESCE($3, currency),
+       description = COALESCE($4, description),
+       category = COALESCE($5, category),
+       specs = COALESCE($6, specs),
+       updated_at = CURRENT_TIMESTAMP
+       WHERE id = $7 
        RETURNING *`,
-      [
-        brand,
-        model,
-        year,
-        price,
-        description,
-        specs.motor,
-        specs.potencia,
-        specs.torque,
-        specs.combustible,
-        specs.transmision,
-        specs.traccion,
-        specs.consumo_urbano,
-        specs.consumo_ruta,
-        specs.consumo_mixto,
-        specs.largo,
-        specs.ancho,
-        specs.alto,
-        specs.peso,
-        specs.cilindrada,
-        specs.aceleracion,
-        specs.velocidad_maxima,
-        specs.tanque,
-        specs.maletero,
-        JSON.stringify(specs.equipamiento || []),
-        JSON.stringify(specs.seguridad || []),
-        id,
-      ]
+      [title, price, currency, description, category, specs ? JSON.stringify(specs) : null, id]
     );
 
     if (result.rows.length === 0) {
       await client.query("ROLLBACK");
-      return res.status(404).json({ error: "Vehículo no encontrado" });
+      return res.status(404).json({ error: "Publicación no encontrada" });
     }
 
-    // Actualizar imágenes si se proporcionan
+    // Actualizar imágenes (Reemplazo completo si se envían nuevas)
     if (images && images.length > 0) {
-      // Eliminar imágenes antiguas
-      await client.query("DELETE FROM vehicle_images WHERE vehicle_id = $1", [
-        id,
-      ]);
+      await client.query("DELETE FROM publication_images WHERE publication_id = $1", [id]);
 
-      // Agregar nuevas imágenes
       const imageArray = Array.isArray(images) ? images : [images];
       for (let i = 0; i < imageArray.length; i++) {
         await client.query(
-          `INSERT INTO vehicle_images (vehicle_id, image_path, is_cover, position)
+          `INSERT INTO publication_images (publication_id, image_path, is_cover, position)
            VALUES ($1, $2, $3, $4)`,
           [id, imageArray[i], i === 0, i]
         );
@@ -447,52 +429,51 @@ app.put("/api/vehicles/:id", authMiddleware, async (req, res) => {
 
     await client.query("COMMIT");
 
-    // Obtener vehículo actualizado con imágenes
-    const vehicleWithImages = await pool.query(
-      `SELECT v.*, 
-              json_agg(json_build_object('id', vi.id, 'image_path', vi.image_path, 'is_cover', vi.is_cover, 'position', vi.position)) as images
-       FROM vehicles v
-       LEFT JOIN vehicle_images vi ON v.id = vi.vehicle_id
-       WHERE v.id = $1
-       GROUP BY v.id`,
+    const fullPub = await pool.query(
+      `SELECT p.*, 
+              json_agg(json_build_object('id', pi.id, 'image_path', pi.image_path, 'is_cover', pi.is_cover, 'position', pi.position)) as images
+       FROM publications p
+       LEFT JOIN publication_images pi ON p.id = pi.publication_id
+       WHERE p.id = $1
+       GROUP BY p.id`,
       [id]
     );
 
     res.json({
       success: true,
-      message: "Vehículo actualizado exitosamente",
-      data: vehicleWithImages.rows[0],
+      message: "Publicación actualizada exitosamente",
+      data: fullPub.rows[0],
     });
   } catch (err) {
     await client.query("ROLLBACK");
-    console.error("Error al actualizar vehículo:", err);
-    res.status(500).json({ error: "Error al actualizar vehículo" });
+    console.error("Error al actualizar publicación:", err);
+    res.status(500).json({ error: "Error al actualizar publicación" });
   } finally {
     client.release();
   }
 });
 
-// DELETE /api/vehicles/:id - Eliminar vehículo (Protegido)
-app.delete("/api/vehicles/:id", authMiddleware, async (req, res) => {
+// DELETE /api/publications/:id
+app.delete("/api/publications/:id", authMiddleware, async (req, res) => {
   const { id } = req.params;
 
   try {
     const result = await pool.query(
-      "DELETE FROM vehicles WHERE id = $1 RETURNING id",
+      "DELETE FROM publications WHERE id = $1 RETURNING id",
       [id]
     );
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: "Vehículo no encontrado" });
+      return res.status(404).json({ error: "Publicación no encontrada" });
     }
 
     res.json({
       success: true,
-      message: "Vehículo eliminado exitosamente",
+      message: "Publicación eliminada exitosamente",
     });
   } catch (err) {
-    console.error("Error al eliminar vehículo:", err);
-    res.status(500).json({ error: "Error al eliminar vehículo" });
+    console.error("Error al eliminar publicación:", err);
+    res.status(500).json({ error: "Error al eliminar publicación" });
   }
 });
 
@@ -508,7 +489,6 @@ app.get("*", (req, res) => {
 
 // Iniciar servidor con inicialización automática de BD
 const startServer = async () => {
-  // Inicializar base de datos
   const dbInitialized = await initializeDatabase();
 
   if (!dbInitialized) {
@@ -516,7 +496,6 @@ const startServer = async () => {
     process.exit(1);
   }
 
-  // Iniciar servidor
   app.listen(PORT, "0.0.0.0", () => {
     console.log(`🚀 Servidor corriendo en http://0.0.0.0:${PORT}`);
     console.log(`📊 Base de datos: ${process.env.DB_NAME || "catalogo_autos"}`);
@@ -530,3 +509,4 @@ startServer();
 process.on("unhandledRejection", (err) => {
   console.error("Error no manejado:", err);
 });
+
