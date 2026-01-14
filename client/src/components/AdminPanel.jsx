@@ -179,6 +179,87 @@ export default function AdminPanel() {
     }));
   };
 
+  const handleDragStart = (e, index) => {
+    e.dataTransfer.setData("text/plain", index);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault(); // Necessary to allow dropping
+  };
+
+  const handleDrop = (e, targetIndex) => {
+    e.preventDefault();
+    const sourceIndex = parseInt(e.dataTransfer.getData("text/plain"), 10);
+    
+    if (sourceIndex === targetIndex) return;
+
+    setFormData((prev) => {
+        const newPreviews = [...prev.imagePreviews];
+        const newImages = [...prev.images];
+
+        // Reorder previews
+        const [movedPreview] = newPreviews.splice(sourceIndex, 1);
+        newPreviews.splice(targetIndex, 0, movedPreview);
+
+        // Reorder actual files if they map 1:1, but careful: 
+        // Logic: 'images' array only holds NEW files. 'imagePreviews' holds mixed (existing & new).
+        // If we are just reordering previews, that's what matters for display.
+        // BUT, for submission, we need to know the final order.
+        // 'handleSubmit' rebuilds the list based on previews? 
+        // Current logic in handleSubmit relies on 'imagePreviews' to determine existing vs new?
+        // Let's check handleSubmit logic again.
+        // It says: "imagePaths = await uploadImages()" for new ones.
+        // "if (editingId && formData.imagePreviews.length === 0)" -> this assumes we replace all if new ones added?
+        // Wait, the current edit logic (lines 405-416 in put) REPLACES ALL images if 'images' array is sent.
+        // So we need to make sure we send the FULL list of desired images in correct order.
+        // For mixed content (existing URLs + new Files), 'uploadImages' only handles new Files.
+        // We probably need to refactor how we submit images to support mixed reordering.
+        // Actually, 'imagePreviews' contains { file, preview, isCover }.
+        // If 'file' is null, it's an existing image. If 'file' is object, it's new.
+        
+        // We should reorder 'images' array too if it exists, but it's tricky because indices might not match if mixed.
+        // SIMPLIFICATION: We will only support reordering of the 'imagePreviews' list effectively.
+        // And we need to make sure handleSubmit uses 'imagePreviews' order to construct the final payload.
+        
+        // However, 'uploadImages' iterates over 'formData.images'. 
+        // If we mix order, we need to map the uploaded files back to their correct slot in the final array.
+        // This is complex. 
+        
+        // SIMPLEST APPROACH for now:
+        // Just reorder 'imagePreviews'.
+        // We also try to reorder 'images' (File objects) but it only works if ALL are new files.
+        // If we have mixed, we might desync 'images' array.
+        
+        // Let's look at updating 'images' array carefully. 
+        // 'imagePreviews' has 1:1 with 'images' ONLY if all are new? 
+        // No, 'images' only stores the File objects. 'imagePreviews' stores everything.
+        // Actually line 169: images: files. (Replace all?) No, handleImageChange appends?
+        // Line 169: images: files (from e.target.files). It replaces simple state if used directly?
+        // line 167: setFormData(prev => ... images: files ... ).
+        // It seems 'images' state strictly holds the FileList from input? 
+        // Wait, handleImageChange (line 158) converts to Array.from(e.target.files).
+        // It REPLACES 'images' and 'imagePreviews' currently? 
+        // Line 167: 'images: files' replaces previous files?
+        // If so, we only support adding a batch at once, not appending?
+        // If it replaces, then 1:1 mapping exists between images and imagePreviews IF we are adding new.
+        // If editing, 'images' is empty initially.
+        
+        // Hack: We mainly care about visual order in 'imagePreviews'.
+        // We also need to keep 'images' (the List of Files) in sync if we want 'uploadImages' to work generally?
+        // Actually 'uploadImages' just uploads whatever is in 'formData.images'. 
+        // The ORDER of upload doesn't matter for file storage.
+        // What matters is the ORDER of paths we send to backend.
+        // So we need to reconstruct the list of paths in the correct order in 'handleSubmit'.
+        
+        return {
+            ...prev,
+            imagePreviews: newPreviews,
+            // We don't necessarily update 'images' (Files) order because we track them via previews for submission logic?
+            // We need to fix handleSubmit to respect 'imagePreviews' order.
+        };
+    });
+  };
+
   const uploadImages = async () => {
     if (formData.images.length === 0) {
       setError("Selecciona al menos una imagen");
@@ -232,23 +313,72 @@ export default function AdminPanel() {
 
     try {
       // Subir imágenes primero
-      let imagePaths = [];
-      if (formData.imagePreviews.length > 0 && formData.images.length > 0) {
-        imagePaths = await uploadImages();
-        if (!imagePaths) {
-          return;
-        }
-      } else if (editingId && formData.imagePreviews.length === 0) {
-        // Si estamos editando y no hay nuevas imágenes, usar las existentes
-        const existingVehicle = vehicles.find((v) => v.id === editingId);
-        if (existingVehicle && existingVehicle.images) {
-          imagePaths = existingVehicle.images.map((img) => img.image_path);
-        }
-        if (existingVehicle && existingVehicle.images) {
-          imagePaths = existingVehicle.images.map((img) => img.image_path);
-        }
-      } 
-      // Si no hay imágenes, simplemente seguimos sin ellas
+      // Subir imágenes nuevas primero
+      let uploadedPaths = [];
+      if (formData.images.length > 0) {
+        uploadedPaths = await uploadImages();
+        if (!uploadedPaths) return;
+      }
+
+      // Construir array final de rutas en orden CORRECTO, mapeando previews
+      // Estrategia: Iterar sobre imagePreviews. 
+      // Si tiene 'file', buscamos su path en uploadedPaths (o asumimos orden si mapeo complejo, idealmente por nombre).
+      // PERO, uploadImages devuelve lista simple.
+      // simplificación: Asumimos que 'formData.images' (Files) se subieron y están en 'uploadedPaths'.
+      // Necesitamos asocia cada File subido con su preview original para saber donde va.
+      // Esto es complejo porque 'uploadedPaths' pierde referencia al objeto File original.
+      
+      // SOLUCIÓN MEJORADA:
+      // Cuando subimos, mapeamos por nombre de archivo o índice?
+      // Mejor aún: Iteramos 'imagePreviews'.
+      // Si tiene 'file' -> Tomamos el siguiente de 'uploadedPaths' (Queue).
+      // Si NO tiene 'file' -> Es URL existente, la usamos directo.
+      
+      // NOTA: Esto asume que 'formData.images' se subió en el mismo orden que 'upload' procesó.
+      // Y que 'formData.images' contiene TODOS los archivos nuevos presentes en 'imagePreviews'.
+      // Como 'removeImagePreview' elimina de 'formData.images' también, deberíamos estar sincronizados.
+      // PERO reordenar previews NO reordena 'formData.images'.
+      // Así que 'uploadImages' subirá en orden original de adición.
+      // Necesitamos matchear.
+      
+      // Vamos a confiar en el nombre del archivo si es posible, o hacer el match manual.
+      // 'uploadedPaths' son strings tipo '/uploads/nombre-timestamp.jpg'.
+      // No tenemos el nombre original fácil ahí si se cambió.
+      
+      // FIX RÁPIDO: Reconstruir 'formData.images' al hacer Drop es difícil.
+      // Vamos a hacer lo siguiente:
+      // 1. Subir todo lo que haya en 'formData.images'.
+      // 2. Crear un mapa temporal: originalName -> uploadedPath.
+      // 3. Recorrer 'imagePreviews'.
+      //    - Si es existente (sin file), push path.
+      //    - Si es nuevo (con file), buscar path en el mapa por nombre de archivo.
+      
+      // Hack para mapear uploaded files a sus originales:
+      // uploadImages devuelve paths. El server preserva nombre original + sufijo.
+      // Podríamos intentar matchear. 
+      // O simplemente, modificar 'uploadImages' para devolver objeto { originalName, path }.
+      // Pero no quiero tocar server si no es necesario.
+      
+      // Alternativa: 'formData.images' NO se reordena. 'uploadedPaths' corresponde a ese orden.
+      // Creamos un mapa: File object -> Uploaded Path.
+      // ¿Cómo? 'formData.images[i]' corresponde a 'uploadedPaths[i]'.
+      
+      let fileToPathMap = new Map();
+      if (formData.images.length > 0 && uploadedPaths.length > 0) {
+        formData.images.forEach((file, idx) => {
+            if (uploadedPaths[idx]) {
+                fileToPathMap.set(file, uploadedPaths[idx]);
+            }
+        });
+      }
+
+      const finalImagePaths = formData.imagePreviews.map(preview => {
+          if (preview.file) {
+              // Es nuevo, buscar en mapa
+              return fileToPathMap.get(preview.file);
+          }
+          return preview.preview; // Es existente (URL)
+      }).filter(p => p); // Filtrar nulos si falla algo
 
 
       // PREPARAR EL PAYLOAD (Empaquetar specs según categoría)
@@ -296,7 +426,7 @@ export default function AdminPanel() {
         currency: 'USD',
         description: formData.description,
         category: formData.category,
-        images: imagePaths,
+        images: finalImagePaths,
         specs: specs, // Enviar specs como objeto anidado, ya que el server lo espera así
       };
 
@@ -651,7 +781,14 @@ export default function AdminPanel() {
                     <div className="md:col-span-2">
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                         {formData.imagePreviews.map((preview, index) => (
-                          <div key={index} className="relative group">
+                          <div 
+                            key={index} 
+                            className="relative group cursor-move"
+                            draggable
+                            onDragStart={(e) => handleDragStart(e, index)}
+                            onDragOver={handleDragOver}
+                            onDrop={(e) => handleDrop(e, index)}
+                          >
                             <img
                               src={preview.preview}
                               alt={`Preview ${index + 1}`}
