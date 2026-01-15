@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import whatsappIcon from "../images/whatsappblanco.png";
 
 export default function Home() {
   return (
@@ -43,7 +44,7 @@ export default function Home() {
               rel="noopener noreferrer"
               className="w-full sm:w-auto bg-white/10 backdrop-blur-md border border-white/30 text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-white/20 transition-all duration-300 shadow-xl flex items-center justify-center gap-2"
             >
-              <span>💬</span> Contactar Asesor
+              <img src={whatsappIcon} alt="WhatsApp" className="w-6 h-6" /> WhatsApp
             </a>
           </div>
         </div>
@@ -136,7 +137,7 @@ export default function Home() {
              <div className="grid grid-cols-1 md:grid-cols-2">
                 {/* Info */}
                 <div className="p-8 md:p-12 flex flex-col justify-center">
-                    <h2 className="text-3xl font-bold text-emerald-950 mb-8 font-serif">Visitanos</h2>
+                    <h2 className="text-3xl font-bold text-emerald-950 mb-8 font-serif">Contacto</h2>
                     
                     <div className="space-y-6">
                         <div className="flex items-start space-x-4">

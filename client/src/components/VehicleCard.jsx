@@ -19,7 +19,7 @@ export default function VehicleCard({ vehicle }) {
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-300 flex flex-col h-full">
       {/* Imagen - Más compacta */}
-      <div className="relative overflow-hidden h-32 sm:h-40 bg-gray-200">
+      <div className="relative overflow-hidden aspect-square sm:aspect-auto sm:h-48 bg-gray-200">
         <img
           src={coverImage}
           alt={`${vehicle.brand} ${vehicle.model}`}
