@@ -207,31 +207,31 @@ export default function Catalog() {
   const [showMobileSort, setShowMobileSort] = useState(false);
 
   return (
-    <div className="min-h-screen bg-white py-8 lg:py-12">
+    <div className="min-h-screen bg-slate-900 py-8 lg:py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8 lg:mb-12">
-          <h1 className="text-3xl lg:text-5xl font-bold text-gray-900 mb-2 lg:mb-4">
+          <h1 className="text-3xl lg:text-5xl font-bold text-white mb-2 lg:mb-4">
             Catálogo
           </h1>
-          <p className="text-lg lg:text-xl text-gray-600">
-            Disponibles: <span className="font-bold">{vehicles.length}</span>{" "}
+          <p className="text-lg lg:text-xl text-slate-400">
+            Disponibles: <span className="font-bold text-blue-400">{vehicles.length}</span>{" "}
             publicaciones
           </p>
         </div>
 
         {/* Botones Móviles (Sticky) */}
         {!loading && vehicles.length > 0 && (
-          <div className="lg:hidden sticky top-4 z-40 bg-white/95 backdrop-blur-sm shadow-md rounded-lg p-2 mb-6 flex gap-2 border border-emerald-100">
+          <div className="lg:hidden sticky top-4 z-40 bg-slate-900/95 backdrop-blur-sm shadow-md rounded-lg p-2 mb-6 flex gap-2 border border-slate-700">
             <button 
               onClick={() => setShowMobileFilters(true)}
-              className="flex-1 bg-stone-100 hover:bg-stone-200 text-stone-800 font-semibold py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition border border-stone-200"
+              className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition border border-slate-700"
             >
               <span className="text-xl">🌪️</span> Filtrar
             </button>
             <button 
               onClick={() => setShowMobileSort(true)}
-              className="flex-1 bg-stone-100 hover:bg-stone-200 text-stone-800 font-semibold py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition border border-stone-200"
+              className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition border border-slate-700"
             >
               <span className="text-xl">⇅</span> Ordenar
             </button>
@@ -244,7 +244,7 @@ export default function Catalog() {
           {/* SIDEBAR FILTROS (Desktop) */}
           {!loading && vehicles.length > 0 && (
             <div className="hidden lg:block lg:col-span-1">
-              <div className="sticky top-4 bg-white border border-stone-200 shadow-sm rounded-xl p-6 space-y-6">
+              <div className="sticky top-4 bg-slate-800 border border-slate-700 shadow-sm rounded-xl p-6 space-y-6">
                 <FiltersContent 
                   brands={brands} selectedBrand={selectedBrand} setSelectedBrand={setSelectedBrand}
                   maxPrice={maxPrice} priceRange={priceRange} setPriceRange={setPriceRange}
@@ -266,18 +266,18 @@ export default function Catalog() {
               // Loading State
               <div className="flex justify-center items-center min-h-96">
                 <div className="text-center">
-                  <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mb-4"></div>
-                  <p className="text-stone-600 text-lg">Cargando catálogo...</p>
+                  <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
+                  <p className="text-slate-400 text-lg">Cargando catálogo...</p>
                 </div>
               </div>
             ) : error ? (
               // Error State
-              <div className="bg-red-50 border border-red-200 rounded-xl p-8 text-center">
+              <div className="bg-red-900/20 border border-red-500/50 rounded-xl p-8 text-center">
                 <div className="text-5xl mb-4">⚠️</div>
-                <h2 className="text-2xl font-bold text-red-900 mb-2">
+                <h2 className="text-2xl font-bold text-red-400 mb-2">
                   Error al cargar
                 </h2>
-                <p className="text-red-700 mb-6">{error}</p>
+                <p className="text-red-300 mb-6">{error}</p>
                 <button
                   onClick={() => window.location.reload()}
                   className="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition font-semibold"
@@ -287,17 +287,17 @@ export default function Catalog() {
               </div>
             ) : filteredVehicles.length === 0 ? (
               // Empty State
-              <div className="bg-stone-50 border border-stone-200 rounded-xl p-12 text-center">
+              <div className="bg-slate-800 border border-slate-700 rounded-xl p-12 text-center">
                 <div className="text-6xl mb-4">🔍</div>
-                <h2 className="text-2xl font-bold text-stone-900 mb-2">
+                <h2 className="text-2xl font-bold text-white mb-2">
                   Sin resultados
                 </h2>
-                <p className="text-stone-600 mb-6">
+                <p className="text-slate-400 mb-6">
                   No encontramos items que coincidan con tus filtros.
                 </p>
                 <button
                   onClick={clearFilters}
-                  className="bg-emerald-600 text-white px-6 py-3 rounded-lg hover:bg-emerald-700 transition font-semibold"
+                  className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition font-semibold"
                 >
                   Ver Todo
                 </button>
@@ -316,11 +316,11 @@ export default function Catalog() {
 
       {/* MODAL MÓVIL: FILTROS */}
       {showMobileFilters && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black bg-opacity-50 transition-opacity backdrop-blur-sm">
-          <div className="bg-white w-full h-[90vh] sm:h-auto sm:max-w-lg rounded-t-2xl sm:rounded-2xl overflow-hidden flex flex-col shadow-2xl animate-slide-up">
-            <div className="p-4 border-b border-stone-100 flex justify-between items-center bg-stone-50">
-              <h2 className="text-lg font-bold text-stone-800">Filtros</h2>
-              <button onClick={() => setShowMobileFilters(false)} className="text-stone-500 hover:text-stone-800 p-2">✕</button>
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-950/80 transition-opacity backdrop-blur-sm">
+          <div className="bg-slate-900 w-full h-[90vh] sm:h-auto sm:max-w-lg rounded-t-2xl sm:rounded-2xl overflow-hidden flex flex-col shadow-2xl animate-slide-up border-t border-slate-700 sm:border">
+            <div className="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-800">
+              <h2 className="text-lg font-bold text-white">Filtros</h2>
+              <button onClick={() => setShowMobileFilters(false)} className="text-slate-400 hover:text-white p-2">✕</button>
             </div>
             <div className="p-6 overflow-y-auto flex-1 space-y-6">
                <FiltersContent 
@@ -337,10 +337,10 @@ export default function Catalog() {
                   isMobile={true}
                 />
             </div>
-            <div className="p-4 border-t border-stone-100 bg-stone-50">
+            <div className="p-4 border-t border-slate-800 bg-slate-800">
                <button 
                   onClick={() => setShowMobileFilters(false)}
-                  className="w-full bg-emerald-600 text-white py-3 rounded-lg font-bold hover:bg-emerald-700 transition"
+                  className="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-500 transition"
                >
                  Ver {filteredVehicles.length} resultados
                </button>
@@ -351,11 +351,11 @@ export default function Catalog() {
 
       {/* MODAL MÓVIL: ORDENAR */}
       {showMobileSort && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black bg-opacity-50 transition-opacity">
-          <div className="bg-white w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl overflow-hidden shadow-2xl animate-slide-up">
-             <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-              <h2 className="text-lg font-bold text-gray-800">Ordenar por</h2>
-              <button onClick={() => setShowMobileSort(false)} className="text-gray-500 hover:text-gray-800 p-2">✕</button>
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-950/80 transition-opacity backdrop-blur-sm">
+          <div className="bg-slate-900 w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl overflow-hidden shadow-2xl animate-slide-up border-t border-slate-700 sm:border">
+             <div className="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-800">
+              <h2 className="text-lg font-bold text-white">Ordenar por</h2>
+              <button onClick={() => setShowMobileSort(false)} className="text-slate-400 hover:text-white p-2">✕</button>
             </div>
             <div className="p-4 space-y-2">
               {[
@@ -367,7 +367,7 @@ export default function Catalog() {
                 <button
                   key={opt.val}
                   onClick={() => { setSortBy(opt.val); setShowMobileSort(false); }}
-                  className={`w-full text-left px-4 py-3 rounded-lg flex justify-between items-center ${sortBy === opt.val ? 'bg-blue-50 text-blue-700 font-bold' : 'hover:bg-gray-50 text-gray-700'}`}
+                  className={`w-full text-left px-4 py-3 rounded-lg flex justify-between items-center ${sortBy === opt.val ? 'bg-blue-600/20 text-blue-400 font-bold' : 'hover:bg-slate-800 text-slate-300'}`}
                 >
                   {opt.label}
                   {sortBy === opt.val && <span>✓</span>}
@@ -396,7 +396,7 @@ const FiltersContent = ({
   <>
     {!isMobile && (
       <div>
-        <h2 className="text-xl font-bold text-gray-900 mb-4">
+        <h2 className="text-xl font-bold text-white mb-4">
           Filtros
         </h2>
       </div>
@@ -404,16 +404,16 @@ const FiltersContent = ({
 
     {/* Filtro por Marca */}
     <div>
-      <label className="block text-sm font-semibold text-gray-900 mb-3">
+      <label className="block text-sm font-semibold text-slate-300 mb-3">
         Marca
       </label>
       <select
         value={selectedBrand}
         onChange={(e) => setSelectedBrand(e.target.value)}
-        className="w-full px-3 py-2 border border-stone-300 rounded-lg text-sm focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
+        className="w-full px-3 py-2 bg-slate-700 border border-slate-600 text-white rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-900/50"
       >
         {brands.map((brand) => (
-          <option key={brand} value={brand}>
+          <option key={brand} value={brand} className="bg-slate-800">
             {brand === "todos" ? "Todas las marcas" : brand}
           </option>
         ))}
@@ -422,8 +422,8 @@ const FiltersContent = ({
 
     {/* Filtro por Precio */}
     <div>
-      <label className="block text-sm font-semibold text-gray-900 mb-3">
-        Precio
+      <label className="block text-sm font-semibold text-slate-300 mb-3">
+        Precio Máximo
       </label>
       <div className="space-y-2">
         <input
@@ -434,11 +434,11 @@ const FiltersContent = ({
           onChange={(e) =>
             setPriceRange([priceRange[0], parseInt(e.target.value)])
           }
-          className="w-full accent-emerald-600"
+          className="w-full accent-blue-500 bg-slate-700"
         />
-        <div className="flex justify-between text-xs text-stone-600">
+        <div className="flex justify-between text-xs text-slate-400">
           <span>${priceRange[0].toLocaleString()}</span>
-          <span>${priceRange[1].toLocaleString()}</span>
+          <span className="text-blue-400 font-bold">${priceRange[1].toLocaleString()}</span>
         </div>
       </div>
     </div>
@@ -446,16 +446,16 @@ const FiltersContent = ({
     {/* Filtros dinámicos */}
     {fuels.length > 0 && (
     <div>
-      <label className="block text-sm font-semibold text-gray-900 mb-3">
+      <label className="block text-sm font-semibold text-slate-300 mb-3">
         Combustible
       </label>
       <select
         value={selectedFuel}
         onChange={(e) => setSelectedFuel(e.target.value)}
-        className="w-full px-3 py-2 border border-stone-300 rounded-lg text-sm focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
+        className="w-full px-3 py-2 bg-slate-700 border border-slate-600 text-white rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-900/50"
       >
         {fuels.map((fuel) => (
-          <option key={fuel} value={fuel}>
+          <option key={fuel} value={fuel} className="bg-slate-800">
             {fuel === "todos" ? "Todos los tipos" : fuel}
           </option>
         ))}
@@ -465,16 +465,16 @@ const FiltersContent = ({
 
     {transmissions.length > 0 && (
     <div>
-      <label className="block text-sm font-semibold text-gray-900 mb-3">
+      <label className="block text-sm font-semibold text-slate-300 mb-3">
         Transmisión
       </label>
       <select
         value={selectedTransmission}
         onChange={(e) => setSelectedTransmission(e.target.value)}
-        className="w-full px-3 py-2 border border-stone-300 rounded-lg text-sm focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
+        className="w-full px-3 py-2 bg-slate-700 border border-slate-600 text-white rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-900/50"
       >
         {transmissions.map((trans) => (
-          <option key={trans} value={trans}>
+          <option key={trans} value={trans} className="bg-slate-800">
             {trans === "todos" ? "Todas las transmisiones" : trans}
           </option>
         ))}
@@ -484,16 +484,16 @@ const FiltersContent = ({
 
     {tractions.length > 0 && (
     <div>
-      <label className="block text-sm font-semibold text-gray-900 mb-3">
+      <label className="block text-sm font-semibold text-slate-300 mb-3">
         Tracción
       </label>
       <select
         value={selectedTraction}
         onChange={(e) => setSelectedTraction(e.target.value)}
-        className="w-full px-3 py-2 border border-stone-300 rounded-lg text-sm focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
+        className="w-full px-3 py-2 bg-slate-700 border border-slate-600 text-white rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-900/50"
       >
         {tractions.map((traction) => (
-          <option key={traction} value={traction}>
+          <option key={traction} value={traction} className="bg-slate-800">
             {traction === "todos"
               ? "Todas las tracciones"
               : traction}
@@ -506,18 +506,18 @@ const FiltersContent = ({
     {/* Ordenamiento (Solo Desktop) */}
     {sortBy && (
       <div>
-        <label className="block text-sm font-semibold text-gray-900 mb-3">
+        <label className="block text-sm font-semibold text-slate-300 mb-3">
           Ordenar por
         </label>
         <select
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value)}
-          className="w-full px-3 py-2 border border-stone-300 rounded-lg text-sm focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
+          className="w-full px-3 py-2 bg-slate-700 border border-slate-600 text-white rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-900/50"
         >
-          <option value="name">Nombre (A-Z)</option>
-          <option value="precio-asc">Precio ($ ↑)</option>
-          <option value="precio-desc">Precio ($ ↓)</option>
-          <option value="año">Año (Más Nuevo)</option>
+          <option value="name" className="bg-slate-800">Nombre (A-Z)</option>
+          <option value="precio-asc" className="bg-slate-800">Precio ($ ↑)</option>
+          <option value="precio-desc" className="bg-slate-800">Precio ($ ↓)</option>
+          <option value="año" className="bg-slate-800">Año (Más Nuevo)</option>
         </select>
       </div>
     )}
@@ -525,16 +525,16 @@ const FiltersContent = ({
     {/* Botón Limpiar */}
     <button
       onClick={clearFilters}
-      className="w-full bg-stone-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-stone-700 transition duration-300 text-sm"
+      className="w-full bg-slate-700 text-white px-4 py-2 rounded-lg font-semibold hover:bg-slate-600 transition duration-300 text-sm border border-slate-600"
     >
       Limpiar Filtros
     </button>
 
     {/* Contador */}
-    <div className="border-t border-gray-200 pt-4 text-xs text-gray-600">
+    <div className="border-t border-slate-700 pt-4 text-xs text-slate-400">
       <p>
-        Mostrando <span className="font-bold text-gray-900">{filteredCount}</span> de{" "}
-        <span className="font-bold text-gray-900">{totalCount}</span> items
+        Mostrando <span className="font-bold text-blue-400">{filteredCount}</span> de{" "}
+        <span className="font-bold text-blue-400">{totalCount}</span> items
       </p>
     </div>
   </>

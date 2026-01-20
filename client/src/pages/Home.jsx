@@ -3,181 +3,207 @@ import whatsappIcon from "../images/whatsappblanco.png";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-stone-50">
-      {/* Hero Section - Country Style */}
+    <div className="min-h-screen bg-slate-900">
+      {/* Hero Section - Generic Premium Car Style */}
       <section
-        className="relative w-full min-h-screen sm:min-h-screen bg-cover bg-center bg-no-repeat flex items-center justify-center"
+        className="relative w-full h-screen flex items-center justify-center"
         style={{
-          backgroundImage: "url('/port.png')",
+          // Using a generic unsplash car image or keeping the previous one if it works, 
+          // but for this task I'll assume we want a dark, sleek background.
+          // Since I can't easily fetch a NEW authentic image without internet, 
+          // I will use a dark gradient or try to use an existing one if suitable, 
+          // or just a placeholder style that looks good.
+          // Let's assume we use a dark gradient overlay heavily.
+          backgroundImage: "url('/port.png')", 
+          backgroundSize: "cover",
+          backgroundPosition: "center",
           backgroundAttachment: "fixed",
-          minHeight: "clamp(500px, 100vh, 900px)",
         }}
       >
-        {/* Overlay con tinte verde/negro */}
-        <div className="absolute inset-0 bg-gradient-to-t from-emerald-950/80 to-black/30"></div>
+        {/* Overlay dark glass effect */}
+        <div className="absolute inset-0 bg-slate-900/80 bg-gradient-to-b from-transparent via-slate-900/50 to-slate-900"></div>
 
-        {/* Contenido - Mobile First */}
-        <div className="relative z-10 w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-16 text-center">
-          <span className="inline-block py-1 px-3 rounded-full bg-amber-500/90 text-white text-xs sm:text-sm font-bold tracking-wider mb-4 uppercase shadow-lg">
-            Potencia para el Campo y la Ciudad
+        {/* Content */}
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center sm:text-left">
+          <span className="inline-block py-1 px-3 rounded-full bg-blue-600/20 text-blue-400 border border-blue-500/30 text-sm font-bold tracking-widest mb-6 uppercase backdrop-blur-sm">
+            Premium Auto Collection
           </span>
-          <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-white mb-4 sm:mb-6 leading-tight drop-shadow-2xl font-serif tracking-tight">
-            Maquinaria, Vehículos <br className="hidden sm:block"/>y Herramientas
+          <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold text-white mb-6 leading-tight tracking-tight">
+            Descubre tu <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300">
+              Próximo Vehículo.
+            </span>
           </h1>
 
-          <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-stone-100 mb-8 sm:mb-10 leading-relaxed drop-shadow-lg font-medium max-w-3xl mx-auto">
-            Equipamos tu trabajo y tu vida. Desde tractores y cosechadoras hasta 
-            la camioneta que necesitás para moverte. Calidad garantizada.
+          <p className="text-lg sm:text-xl text-slate-300 mb-10 leading-relaxed max-w-2xl font-light">
+            Elegancia, rendimiento y confianza. Explora nuestra selección exclusiva de automóviles verificados y listos para rodar.
           </p>
 
           {/* Botones */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          <div className="flex flex-col sm:flex-row gap-4">
             <Link
               to="/catalogo"
-              className="w-full sm:w-auto bg-emerald-600 text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-emerald-700 hover:scale-105 transition-all duration-300 shadow-xl border-b-4 border-emerald-800 flex items-center justify-center gap-2"
+              className="bg-blue-600 text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-blue-500 transition-all duration-300 shadow-lg shadow-blue-900/20 hover:shadow-blue-900/40 transform hover:-translate-y-1"
             >
-              <span>🚜</span> Ver Catálogo
+              Ver Catálogo
             </Link>
             <a
-              href="https://api.whatsapp.com/send/?phone=543465650796&text=Hola,+me+interesa+consultar+sobre+maquinaria+o+vehículos&type=phone_number&app_absent=0"
+              href="https://api.whatsapp.com/send/?phone=543465123456&text=Hola,+quisiera+consultar+sobre+un+vehículo&type=phone_number&app_absent=0"
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full sm:w-auto bg-white/10 backdrop-blur-md border border-white/30 text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-white/20 transition-all duration-300 shadow-xl flex items-center justify-center gap-2"
+              className="bg-white/5 backdrop-blur-md border border-white/10 text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-white/10 transition-all duration-300 flex items-center justify-center gap-2"
             >
-              <img src={whatsappIcon} alt="WhatsApp" className="w-6 h-6" /> WhatsApp
+              <img src={whatsappIcon} alt="WhatsApp" className="w-5 h-5 opacity-80" /> 
+              Contactar
             </a>
           </div>
         </div>
       </section>
 
-      {/* Features Section - Estilo Robusto */}
-      <section className="py-16 sm:py-24 bg-stone-100">
+      {/* Features / Categories Simplified */}
+      <section className="py-24 bg-slate-900">
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-emerald-950 mb-4 font-serif">
-              Soluciones Integrales
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+              ¿Por qué elegirnos?
             </h2>
-            <div className="h-1 w-24 bg-amber-500 mx-auto rounded-full mb-6"></div>
-            <p className="text-lg text-stone-600 max-w-2xl mx-auto">
-              Sabemos lo que el campo y la ciudad necesitan. Tecnología, potencia y servicio post-venta.
+            <p className="text-slate-400 max-w-2xl mx-auto">
+              Brindamos una experiencia de compra transparente y segura.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Feature 1 */}
-            <div className="bg-white p-8 rounded-xl shadow-lg border-b-4 border-emerald-600 hover:-translate-y-2 transition-transform duration-300">
-              <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center text-4xl mb-6 text-emerald-700">
-                🚜
+            <div className="bg-slate-800/50 p-8 rounded-2xl border border-slate-700 hover:border-blue-500/50 transition-colors duration-300 group">
+              <div className="w-14 h-14 bg-blue-900/50 rounded-xl flex items-center justify-center text-2xl mb-6 text-blue-400 group-hover:scale-110 transition-transform">
+                ✨
               </div>
-              <h3 className="text-2xl font-bold text-emerald-950 mb-3">
-                Maquinaria Agrícola
+              <h3 className="text-xl font-bold text-white mb-3">
+                Calidad Certificada
               </h3>
-              <p className="text-stone-600 leading-relaxed">
-                Potencia motorizada para tu campo. Tractores, cosechadoras y 
-                equipos autopropulsados de alto rendimiento.
+              <p className="text-slate-400 leading-relaxed">
+                Cada unidad es inspeccionada rigurosamente para asegurar su estado y funcionamiento óptimo.
               </p>
             </div>
 
             {/* Feature 2 */}
-            <div className="bg-white p-8 rounded-xl shadow-lg border-b-4 border-amber-500 hover:-translate-y-2 transition-transform duration-300">
-              <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center text-4xl mb-6 text-amber-600">
-                🛻
+            <div className="bg-slate-800/50 p-8 rounded-2xl border border-slate-700 hover:border-blue-500/50 transition-colors duration-300 group">
+              <div className="w-14 h-14 bg-blue-900/50 rounded-xl flex items-center justify-center text-2xl mb-6 text-blue-400 group-hover:scale-110 transition-transform">
+                🤝
               </div>
-              <h3 className="text-2xl font-bold text-emerald-950 mb-3">
-                Vehículos
+              <h3 className="text-xl font-bold text-white mb-3">
+                Trato Directo
               </h3>
-              <p className="text-stone-600 leading-relaxed">
-                Encontrá cualquier tipo de vehículo. Desde camionetas de trabajo 
-                hasta autos particulares. Tu movilidad resuelta.
+              <p className="text-slate-400 leading-relaxed">
+                Sin intermediarios innecesarios. Negociación transparente y asesoramiento personalizado.
               </p>
             </div>
 
             {/* Feature 3 */}
-            <div className="bg-white p-8 rounded-xl shadow-lg border-b-4 border-emerald-600 hover:-translate-y-2 transition-transform duration-300">
-              <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center text-4xl mb-6 text-emerald-700">
-                🛠️
+            <div className="bg-slate-800/50 p-8 rounded-2xl border border-slate-700 hover:border-blue-500/50 transition-colors duration-300 group">
+              <div className="w-14 h-14 bg-blue-900/50 rounded-xl flex items-center justify-center text-2xl mb-6 text-blue-400 group-hover:scale-110 transition-transform">
+                📄
               </div>
-              <h3 className="text-2xl font-bold text-emerald-950 mb-3">
-                Herramientas e Implementos
+              <h3 className="text-xl font-bold text-white mb-3">
+                Gestoría Integral
               </h3>
-              <p className="text-stone-600 leading-relaxed">
-                Equipamiento especializado: Tolvas, plataformas, sembradoras 
-                y todo lo necesario para complementar tu maquinaria.
+              <p className="text-slate-400 leading-relaxed">
+                Te acompañamos en todo el proceso de transferencia y documentación de tu nuevo vehículo.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Call to Action */}
-      <section className="py-20 bg-emerald-900 relative overflow-hidden">
-        {/* Pattern Background opcional */}
-        <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle, #ffffff 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
-        
+      {/* Stats / Trust Section */}
+      <section className="py-20 border-y border-slate-800 bg-slate-950">
+         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+                <div>
+                    <div className="text-4xl font-bold text-blue-500 mb-2">+100</div>
+                    <div className="text-slate-400 text-sm uppercase tracking-wider">Vehículos Vendidos</div>
+                </div>
+                <div>
+                    <div className="text-4xl font-bold text-blue-500 mb-2">10</div>
+                    <div className="text-slate-400 text-sm uppercase tracking-wider">Años de Experiencia</div>
+                </div>
+                <div>
+                    <div className="text-4xl font-bold text-blue-500 mb-2">100%</div>
+                    <div className="text-slate-400 text-sm uppercase tracking-wider">Transparencia</div>
+                </div>
+                <div>
+                    <div className="text-4xl font-bold text-blue-500 mb-2">24/7</div>
+                    <div className="text-slate-400 text-sm uppercase tracking-wider">Soporte</div>
+                </div>
+            </div>
+         </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-24 relative overflow-hidden">
+        <div className="absolute inset-0 bg-blue-600/5"></div>
         <div className="relative z-10 w-full max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-6 font-serif">
-            ¿Buscas mejorar tu equipamiento?
+          <h2 className="text-4xl font-bold text-white mb-6">
+            ¿Listo para encontrar tu auto ideal?
           </h2>
-          <p className="text-lg md:text-xl text-emerald-100 mb-10 leading-relaxed max-w-2xl mx-auto">
-            Recorre nuestro catálogo completo y encontrá oportunidades únicas en maquinaria y rodados.
+          <p className="text-xl text-slate-400 mb-10 leading-relaxed">
+            No pierdas más tiempo buscando. Tenemos lo que necesitas al mejor precio del mercado.
           </p>
           <Link
             to="/catalogo"
-            className="inline-flex items-center justify-center bg-amber-500 text-emerald-950 px-10 py-4 rounded-lg font-bold text-lg hover:bg-amber-400 hover:scale-105 transition-all duration-300 shadow-xl"
+            className="inline-flex items-center justify-center bg-blue-600 text-white px-10 py-4 rounded-full font-bold text-lg hover:bg-blue-500 transition-all duration-300 shadow-xl shadow-blue-600/30"
           >
-            Explorar Catálogo
+            Ver Inventario Completo
           </Link>
         </div>
       </section>
 
       {/* Contact Section Relocated */}
-      <section className="py-16 bg-white">
+      <section className="py-20 bg-slate-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-5xl mx-auto bg-stone-50 rounded-2xl shadow-xl overflow-hidden border border-stone-200">
-             <div className="grid grid-cols-1 md:grid-cols-2">
-                {/* Info */}
-                <div className="p-8 md:p-12 flex flex-col justify-center">
-                    <h2 className="text-3xl font-bold text-emerald-950 mb-8 font-serif">Contacto</h2>
-                    
-                    <div className="space-y-6">
-                        <div className="flex items-start space-x-4">
-                            <div className="text-2xl text-amber-500">📍</div>
-                            <div>
-                                <h3 className="font-bold text-emerald-900 mb-1">Ubicación</h3>
-                                <p className="text-stone-600">Caseros, Santa Fe</p>
-                            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 bg-slate-800 rounded-3xl overflow-hidden shadow-2xl p-2 border border-slate-700">
+             {/* Info */}
+             <div className="p-8 md:p-12 flex flex-col justify-center">
+                <h3 className="text-2xl font-bold text-white mb-8">Contáctanos</h3>
+                
+                <div className="space-y-8">
+                    <div className="flex items-start space-x-4">
+                        <div className="p-3 bg-slate-700 rounded-lg text-blue-400">📍</div>
+                        <div>
+                            <h4 className="font-bold text-white mb-1">Ubicación</h4>
+                            <p className="text-slate-400">Caseros, Provincia de Santa Fe</p>
                         </div>
+                    </div>
 
-                        <div className="flex items-start space-x-4">
-                             <div className="text-2xl text-amber-500">✉️</div>
-                            <div>
-                                <h3 className="font-bold text-emerald-900 mb-1">Email</h3>
-                                <p className="text-stone-600">piermatteiariel67@gmail.com</p>
-                            </div>
+                    <div className="flex items-start space-x-4">
+                         <div className="p-3 bg-slate-700 rounded-lg text-blue-400">✉️</div>
+                        <div>
+                            <h4 className="font-bold text-white mb-1">Email</h4>
+                            <p className="text-slate-400">contacto@autoprime.com</p>
                         </div>
+                    </div>
 
-                        <div className="flex items-start space-x-4">
-                            <div className="text-2xl text-amber-500">📱</div>
-                            <div>
-                                <h3 className="font-bold text-emerald-900 mb-1">Teléfono</h3>
-                                <p className="text-stone-600">3465-650796 (Ariel Piermattei)</p>
-                            </div>
+                    <div className="flex items-start space-x-4">
+                        <div className="p-3 bg-slate-700 rounded-lg text-blue-400">📱</div>
+                        <div>
+                            <h4 className="font-bold text-white mb-1">Teléfono</h4>
+                            <p className="text-slate-400">+54 3465 123456</p>
                         </div>
                     </div>
                 </div>
+             </div>
 
-                {/* Map */}
-                <div className="h-64 md:h-auto bg-gray-200">
-                    <iframe 
-                      src="https://maps.google.com/maps?q=Caseros%2C+Santa+Fe%2C+Argentina&t=&z=15&ie=UTF8&iwloc=&output=embed"
-                      width="100%" 
-                      height="100%" 
-                      style={{ border: 0 }} 
-                      allowFullScreen="" 
-                      loading="lazy" 
-                      referrerPolicy="no-referrer-when-downgrade"
-                    ></iframe>
-                </div>
+             {/* Map */}
+             <div className="h-64 md:h-auto rounded-2xl overflow-hidden">
+                <iframe 
+                  src="https://maps.google.com/maps?q=Caseros%2C+Santa+Fe%2C+Argentina&t=&z=15&ie=UTF8&iwloc=&output=embed"
+                  width="100%" 
+                  height="100%" 
+                  style={{ border: 0, filter: 'grayscale(100%) invert(90%)' }} 
+                  allowFullScreen="" 
+                  loading="lazy" 
+                  referrerPolicy="no-referrer-when-downgrade"
+                ></iframe>
              </div>
           </div>
         </div>

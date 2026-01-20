@@ -127,33 +127,33 @@ export default function CarDetail() {
     }).format(price);
 
   return (
-    <div className="min-h-screen bg-white py-12">
+    <div className="min-h-screen bg-slate-900 py-12">
       <div className="max-w-6xl mx-auto px-4">
         {/* Header */}
         <div className="mb-8">
           <button
             onClick={() => navigate("/catalogo")}
-            className="text-blue-600 hover:text-blue-700 font-semibold mb-4"
+            className="text-blue-400 hover:text-blue-300 font-semibold mb-4 flex items-center gap-2 group transition-all"
           >
-            ← Volver al Catálogo
+            <span className="group-hover:-translate-x-1 transition-transform">←</span> Volver al Catálogo
           </button>
-          <h1 className="text-4xl font-bold text-gray-900">
+          <h1 className="text-4xl font-bold text-white tracking-tight">
             {car.title || `${car.brand} ${car.model}`}
           </h1>
-          {car.year && <p className="text-xl text-gray-600 mt-2">Año {car.year}</p>}
+          {car.year && <p className="text-xl text-slate-400 mt-2">Año {car.year}</p>}
         </div>
 
         {/* Grid Principal */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
           {/* Carrusel de Imágenes */}
           <div className="lg:col-span-2">
-            <div className="bg-gray-100 rounded-xl overflow-hidden shadow-lg mb-6 relative group flex items-center justify-center bg-opacity-20">
+            <div className="bg-slate-800 rounded-2xl overflow-hidden shadow-2xl mb-6 relative group flex items-center justify-center border border-slate-700">
               <img
                 src={currentImage}
                 alt={`${car.brand} ${car.model} - Foto ${currentImageIndex + 1
                   }`}
                 onClick={() => setShowZoom(true)}
-                className="w-full h-auto max-h-[80vh] object-contain mx-auto cursor-zoom-in"
+                className="w-full h-auto max-h-[80vh] object-contain mx-auto cursor-zoom-in hover:scale-[1.02] transition-transform duration-500"
               />
 
               {/* Controles del Carrusel */}
@@ -162,7 +162,7 @@ export default function CarDetail() {
                   {/* Botón Anterior */}
                   <button
                     onClick={goToPreviousImage}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-70 text-white p-2 rounded-full transition z-10"
+                    className="absolute left-4 top-1/2 -translate-y-1/2 bg-slate-900/60 hover:bg-slate-900/80 text-white p-3 rounded-full transition-all z-10 backdrop-blur-md border border-slate-700"
                     aria-label="Imagen anterior"
                   >
                     <svg
@@ -183,7 +183,7 @@ export default function CarDetail() {
                   {/* Botón Siguiente */}
                   <button
                     onClick={goToNextImage}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-70 text-white p-2 rounded-full transition z-10"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 bg-slate-900/60 hover:bg-slate-900/80 text-white p-3 rounded-full transition-all z-10 backdrop-blur-md border border-slate-700"
                     aria-label="Siguiente imagen"
                   >
                     <svg
@@ -202,7 +202,7 @@ export default function CarDetail() {
                   </button>
 
                   {/* Indicador de posición */}
-                  <div className="absolute bottom-4 right-4 bg-black bg-opacity-60 text-white px-3 py-1 rounded-full text-sm">
+                  <div className="absolute bottom-4 right-4 bg-slate-900/60 backdrop-blur-md text-white px-3 py-1 rounded-full text-xs font-bold border border-slate-700">
                     {currentImageIndex + 1} / {images.length}
                   </div>
                 </>
@@ -211,14 +211,14 @@ export default function CarDetail() {
 
             {/* Miniaturas del Carrusel */}
             {images.length > 1 && (
-              <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+              <div className="flex gap-3 mb-6 overflow-x-auto pb-4 no-scrollbar">
                 {images.map((image, index) => (
                   <button
                     key={index}
                     onClick={() => setCurrentImageIndex(index)}
-                    className={`flex-shrink-0 h-20 w-20 rounded-lg overflow-hidden border-2 transition ${index === currentImageIndex
-                        ? "border-blue-600"
-                        : "border-gray-300 hover:border-gray-400"
+                    className={`flex-shrink-0 h-20 w-20 rounded-xl overflow-hidden border-2 transition-all ${index === currentImageIndex
+                        ? "border-blue-500 scale-105 shadow-lg shadow-blue-500/20"
+                        : "border-slate-700 hover:border-slate-500 opacity-60 hover:opacity-100"
                       }`}
                   >
                     <img
@@ -232,11 +232,11 @@ export default function CarDetail() {
             )}
 
             {/* Descripción */}
-            <div className="bg-gray-50 p-6 rounded-xl mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            <div className="bg-slate-800/50 p-8 rounded-2xl border border-slate-700 mb-6 backdrop-blur-sm">
+              <h2 className="text-2xl font-bold text-white mb-4">
                 Descripción
               </h2>
-              <p className="text-gray-700 text-lg leading-relaxed">
+              <p className="text-slate-300 text-lg leading-relaxed font-light">
                 {car.description}
               </p>
             </div>
@@ -244,41 +244,48 @@ export default function CarDetail() {
 
           {/* Panel Precio y CTA */}
           <div>
-            <div className="bg-blue-600 text-white p-8 rounded-xl shadow-lg sticky top-20">
+            <div className="bg-slate-800 p-8 rounded-3xl shadow-2xl sticky top-20 border border-slate-700">
               {Number(car.price) > 0 && (
                 <>
-                  <p className="text-sm text-blue-100 mb-2">Precio Final</p>
-                  <p className="text-4xl font-bold mb-6">
+                  <p className="text-sm text-slate-400 mb-2 uppercase tracking-widest font-bold">Precio Final</p>
+                  <p className="text-4xl font-extrabold text-blue-400 mb-6">
                     {formattedPrice(car.price)}
                   </p>
                 </>
               )}
 
-              <div className="space-y-3 mb-6">
-                <p className="text-blue-100 text-sm">
-                  ✓ Financiamiento disponible
-                </p>
-                <p className="text-blue-100 text-sm">✓ Garantía incluida</p>
-                <p className="text-blue-100 text-sm">✓ Entrega inmediata</p>
+              <div className="space-y-4 mb-8">
+                <div className="flex items-center gap-3 text-slate-300">
+                   <span className="text-blue-500">✓</span>
+                   <span className="text-sm">Financiamiento disponible</span>
+                </div>
+                <div className="flex items-center gap-3 text-slate-300">
+                   <span className="text-blue-500">✓</span>
+                   <span className="text-sm">Garantía certificada</span>
+                </div>
+                <div className="flex items-center gap-3 text-slate-300">
+                   <span className="text-blue-500">✓</span>
+                   <span className="text-sm">Entrega inmediata</span>
+                </div>
               </div>
 
               <a
-                href={`https://wa.me/543465650796?text=${encodeURIComponent(
-                  `Hola, me interesa: ${car.title || `${car.brand} ${car.model}`}`
+                href={`https://wa.me/543465123456?text=${encodeURIComponent(
+                  `Hola, me interesa este vehículo: ${car.title || `${car.brand} ${car.model}`}`
                 )}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block w-full text-center bg-green-600 text-white py-4 rounded-lg font-bold text-lg hover:bg-green-700 transition flex items-center justify-center gap-2 shadow-lg active:scale-95"
+                className="block w-full text-center bg-blue-600 text-white py-4 rounded-xl font-bold text-lg hover:bg-blue-500 transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-600/20 active:scale-95 mb-4"
               >
-                <img src={whatsappIcon} alt="WhatsApp" className="w-8 h-8" />
-                Contactar Vendedor
+                <img src={whatsappIcon} alt="WhatsApp" className="w-6 h-6" />
+                Consultar ahora
               </a>
 
               <button
                 onClick={async () => {
                   const shareData = {
-                    title: `Ariel Piermattei Maquinarias: ${car.title || `${car.brand} ${car.model}`}`,
-                    text: `Mira esta máquina: ${car.title || `${car.brand} ${car.model}`}. Entra al enlace para ver más detalles.`,
+                    title: `AutoPrime: ${car.title || `${car.brand} ${car.model}`}`,
+                    text: `Mira este vehículo en AutoPrime: ${car.title || `${car.brand} ${car.model}`}.`,
                     url: window.location.href,
                   };
 
@@ -293,7 +300,7 @@ export default function CarDetail() {
                     alert("¡Enlace copiado al portapapeles!");
                   }
                 }}
-                className="block w-full text-center bg-gray-200 text-gray-800 py-4 rounded-lg font-bold text-lg hover:bg-gray-300 transition mt-3 shadow active:scale-95"
+                className="block w-full text-center bg-slate-700 text-slate-200 py-3 rounded-xl font-bold text-lg hover:bg-slate-600 transition shadow active:scale-95"
               >
                 Compartir 🔗
               </button>
@@ -303,27 +310,27 @@ export default function CarDetail() {
 
         {/* Renderizado dinámico de specs */}
         {car.category === 'VEHICULO' && (
-          <div className="bg-gray-50 p-8 rounded-xl mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-8">
+          <div className="bg-slate-800/30 p-8 rounded-3xl mb-12 border border-slate-700/50 backdrop-blur-sm">
+            <h2 className="text-3xl font-bold text-white mb-8 tracking-tight">
               Ficha Técnica
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="bg-white p-6 rounded-lg shadow-sm">
-                <h3 className="text-sm font-semibold text-gray-600 mb-2">MOTOR</h3>
-                <p className="text-lg font-bold text-gray-900">{car.motor || 'N/A'}</p>
+              <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-sm">
+                <h3 className="text-xs font-bold text-blue-500 mb-2 uppercase tracking-tighter">MOTOR</h3>
+                <p className="text-xl font-bold text-white">{car.motor || 'N/A'}</p>
               </div>
-              <div className="bg-white p-6 rounded-lg shadow-sm">
-                <h3 className="text-sm font-semibold text-gray-600 mb-2">POTENCIA</h3>
-                <p className="text-lg font-bold text-gray-900">{car.potencia || 'N/A'}</p>
+              <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-sm">
+                <h3 className="text-xs font-bold text-blue-500 mb-2 uppercase tracking-tighter">POTENCIA</h3>
+                <p className="text-xl font-bold text-white">{car.potencia || 'N/A'}</p>
               </div>
-              <div className="bg-white p-6 rounded-lg shadow-sm">
-                <h3 className="text-sm font-semibold text-gray-600 mb-2">TRANSMISIÓN</h3>
-                <p className="text-lg font-bold text-gray-900">{car.transmision || 'N/A'}</p>
+              <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-sm">
+                <h3 className="text-xs font-bold text-blue-500 mb-2 uppercase tracking-tighter">TRANSMISIÓN</h3>
+                <p className="text-xl font-bold text-white">{car.transmision || 'N/A'}</p>
               </div>
-              <div className="bg-white p-6 rounded-lg shadow-sm">
-                <h3 className="text-sm font-semibold text-gray-600 mb-2">KM</h3>
-                <p className="text-lg font-bold text-gray-900">{car.km || '0'} km</p>
+              <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-sm">
+                <h3 className="text-xs font-bold text-blue-500 mb-2 uppercase tracking-tighter">RECORRIDO</h3>
+                <p className="text-xl font-bold text-white">{car.km || '0'} km</p>
               </div>
             </div>
           </div>
@@ -376,9 +383,9 @@ export default function CarDetail() {
 
         {/* Autos Relacionados Carousel */}
         {relatedCars.length > 0 && (
-          <div className="mt-16 border-t pt-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-8">
-              Relacionados
+          <div className="mt-16 border-t border-slate-800 pt-12">
+            <h2 className="text-3xl font-bold text-white mb-8 tracking-tight">
+              Vehículos Recomendados
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {relatedCars.map((related) => {
@@ -389,27 +396,27 @@ export default function CarDetail() {
                 return (
                   <div
                     key={related.id}
-                    className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 hover:shadow-xl transition-shadow duration-300"
+                    className="bg-slate-800 rounded-2xl shadow-xl overflow-hidden border border-slate-700 hover:border-blue-500/50 transition-all duration-300 group"
                   >
                     <div className="h-48 overflow-hidden">
                       <img
                         src={relatedCoverImage}
                         alt={`${related.brand} ${related.model}`}
-                        className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-500"
+                        className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
                       />
                     </div>
                     <div className="p-6">
-                      <h3 className="text-xl font-bold text-gray-900 mb-2">
+                      <h3 className="text-xl font-bold text-white mb-2">
                         {related.brand} {related.model}
                       </h3>
-                      <p className="text-gray-600 mb-4 text-sm line-clamp-2">
+                      <p className="text-slate-400 mb-4 text-sm line-clamp-2 font-light">
                         {related.description}
                       </p>
                       <div className="flex justify-between items-end">
                         {Number(related.price) > 0 && (
                           <div>
-                            <p className="text-xs text-gray-500 mb-1">Precio</p>
-                            <p className="text-xl font-bold text-blue-600">
+                            <p className="text-xs text-slate-500 mb-1 uppercase font-bold">Precio</p>
+                            <p className="text-xl font-bold text-blue-400">
                               {formattedPrice(related.price)}
                             </p>
                           </div>
@@ -417,9 +424,9 @@ export default function CarDetail() {
                         <Link
                           to={`/catalogo/${related.id}`}
                           onClick={() => window.scrollTo(0, 0)}
-                          className="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-800 transition"
+                          className="bg-blue-600 text-white px-5 py-2 rounded-xl text-sm font-bold hover:bg-blue-500 transition shadow-lg shadow-blue-600/20"
                         >
-                          Ver Detalle
+                          Ver Ahora
                         </Link>
                       </div>
                     </div>
@@ -432,33 +439,33 @@ export default function CarDetail() {
         {/* Modal Zoom */}
         {showZoom && (
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-95 p-4"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/95 p-4 backdrop-blur-md"
             onClick={() => setShowZoom(false)}
           >
             <button
               onClick={() => setShowZoom(false)}
-              className="absolute top-4 right-4 text-white text-4xl p-4 hover:text-gray-300 z-50 bg-black/50 rounded-full"
+              className="absolute top-4 right-4 text-white text-4xl p-4 hover:text-blue-400 z-50 bg-slate-900/50 rounded-full transition-colors"
             >
               ✕
             </button>
             <img
               src={currentImage}
               alt="Zoom"
-              className="max-w-full max-h-[90vh] object-contain"
+              className="max-w-full max-h-[90vh] object-contain border border-slate-700/50 rounded-lg"
               onClick={(e) => e.stopPropagation()}
             />
-            {/* Navegación en Zoom (Opcional, reutilizando funciones existentes) */}
+            {/* Navegación en Zoom */}
             {images.length > 1 && (
               <>
                 <button
                   onClick={(e) => { e.stopPropagation(); goToPreviousImage(); }}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-white p-4 text-5xl hover:text-gray-300 transition"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-white p-4 text-5xl hover:text-blue-400 transition"
                 >
                   ‹
                 </button>
                 <button
                   onClick={(e) => { e.stopPropagation(); goToNextImage(); }}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-white p-4 text-5xl hover:text-gray-300 transition"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-white p-4 text-5xl hover:text-blue-400 transition"
                 >
                   ›
                 </button>

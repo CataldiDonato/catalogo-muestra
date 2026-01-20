@@ -98,7 +98,7 @@ export default function Auth() {
             <div>
               <label
                 htmlFor="name"
-                className="block text-sm font-medium text-gray-700 mb-2"
+                className="block text-sm font-medium text-gray-800 mb-2"
               >
                 Nombre Completo
               </label>
@@ -109,7 +109,7 @@ export default function Auth() {
                 value={formData.name}
                 onChange={handleChange}
                 required={!isLogin}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
                 placeholder="Juan Pérez"
               />
             </div>
@@ -118,7 +118,7 @@ export default function Auth() {
           <div>
             <label
               htmlFor="email"
-              className="block text-sm font-medium text-gray-700 mb-2"
+              className="block text-sm font-medium text-gray-800 mb-2"
             >
               Correo Electrónico
             </label>
@@ -129,7 +129,7 @@ export default function Auth() {
               value={formData.email}
               onChange={handleChange}
               required
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
               placeholder="tu@email.com"
             />
           </div>
@@ -137,7 +137,7 @@ export default function Auth() {
           <div>
             <label
               htmlFor="password"
-              className="block text-sm font-medium text-gray-700 mb-2"
+              className="block text-sm font-medium text-gray-800 mb-2"
             >
               Contraseña
             </label>
@@ -148,7 +148,7 @@ export default function Auth() {
               value={formData.password}
               onChange={handleChange}
               required
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
               placeholder="••••••••"
             />
           </div>

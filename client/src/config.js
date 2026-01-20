@@ -7,7 +7,7 @@
 const API_BASE_URL =
   import.meta.env.VITE_API_URL ||
   (import.meta.env.DEV
-    ? `${window.location.origin.replace(/:\d+/, ":3000")}`
+    ? `${window.location.origin.replace(/:\d+/, ":5000")}`
     : "");
 
 export const API_ENDPOINTS = {

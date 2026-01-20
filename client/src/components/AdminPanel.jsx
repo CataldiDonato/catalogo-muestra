@@ -626,7 +626,7 @@ export default function AdminPanel() {
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
             <div className="bg-white rounded-lg shadow-2xl w-full max-w-3xl my-8">
               <div className="sticky top-0 bg-blue-600 text-white p-6 flex justify-between items-center rounded-t-lg z-10">
-                <h2 className="text-2xl font-bold">
+                <h2 className="text-2xl font-bold text-white">
                   {editingId ? "Editar Publicación" : "Nueva Publicación"}
                 </h2>
                 <button
@@ -645,7 +645,7 @@ export default function AdminPanel() {
                         name="category"
                         value={formData.category}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 border-2 border-blue-200 rounded-lg text-lg focus:border-blue-500 outline-none"
+                        className="w-full px-4 py-3 border-2 border-blue-200 rounded-lg text-lg focus:border-blue-500 outline-none text-gray-900"
                     >
                         <option value="VEHICULO">Vehículo</option>
                         <option value="MAQUINARIA">Maquinaria Agrícola</option>
@@ -660,58 +660,58 @@ export default function AdminPanel() {
                   
                   {/* Título y Precio (Comunes) */}
                   <div className="md:col-span-2">
-                     <label className="block font-bold mb-2">Título (Opcional - se genera automático)</label>
+                     <label className="block font-bold mb-2 text-gray-700">Título (Opcional - se genera automático)</label>
                      <input
                       type="text"
                       name="title"
                       value={formData.title}
                       onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded"
+                      className="w-full px-3 py-2 border border-gray-300 rounded text-gray-900"
                       placeholder="Ej: Toyota Hilux 2021..."
                      />
                   </div>
                    <div>
-                    <label className="block font-bold mb-2">Precio (USD)</label>
-                    <input
-                      type="number"
-                      name="price"
-                      value={formData.price}
-                      onChange={handleChange}
-                      step="0.01"
-                      className="w-full px-3 py-2 border border-gray-300 rounded"
-                    />
+                    <label className="block font-bold mb-2 text-gray-700">Precio (USD)</label>
+                      <input style={{ color: 'black' }}
+                        type="number"
+                        name="price"
+                        value={formData.price}
+                        onChange={handleChange}
+                        step="0.01"
+                        className="w-full px-3 py-2 border border-gray-300 rounded text-gray-900"
+                      />
                   </div>
                   
                   {/* --- VEHÍCULO --- */}
                   {formData.category === 'VEHICULO' && (
                   <>
                       <div>
-                        <label className="block font-bold mb-2">Marca</label>
-                        <input type="text" name="brand" value={formData.brand} onChange={handleChange} className="w-full px-3 py-2 border border-gray-300 rounded" />
+                        <label className="block font-bold mb-2 text-gray-700">Marca</label>
+                        <input type="text" name="brand" value={formData.brand} onChange={handleChange} className="w-full px-3 py-2 border border-gray-300 rounded text-gray-900" />
                       </div>
                       <div>
-                        <label className="block font-bold mb-2">Modelo</label>
-                        <input type="text" name="model" value={formData.model} onChange={handleChange} className="w-full px-3 py-2 border border-gray-300 rounded" />
+                        <label className="block font-bold mb-2 text-gray-700">Modelo</label>
+                        <input type="text" name="model" value={formData.model} onChange={handleChange} className="w-full px-3 py-2 border border-gray-300 rounded text-gray-900" />
                       </div>
                       <div>
-                        <label className="block font-bold mb-2">Año</label>
-                        <input type="number" name="year" value={formData.year} onChange={handleChange} className="w-full px-3 py-2 border border-gray-300 rounded" />
+                        <label className="block font-bold mb-2 text-gray-700">Año</label>
+                        <input type="number" name="year" value={formData.year} onChange={handleChange} className="w-full px-3 py-2 border border-gray-300 rounded text-gray-900" />
                       </div>
                        <div>
-                        <label className="block font-bold mb-2">Kilómetros</label>
-                        <input type="number" name="km" value={formData.km} onChange={handleChange} className="w-full px-3 py-2 border border-gray-300 rounded" />
+                        <label className="block font-bold mb-2 text-gray-700">Kilómetros</label>
+                        <input type="number" name="km" value={formData.km} onChange={handleChange} className="w-full px-3 py-2 border border-gray-300 rounded text-gray-900" />
                       </div>
                       <div>
-                        <label className="block font-bold mb-2">Transmisión</label>
-                         <select name="transmision" value={formData.transmision} onChange={handleChange} className="w-full px-3 py-2 border border-gray-300 rounded">
+                        <label className="block font-bold mb-2 text-gray-700">Transmisión</label>
+                         <select name="transmision" value={formData.transmision} onChange={handleChange} className="w-full px-3 py-2 border border-gray-300 rounded text-gray-900">
                             <option value="">Seleccionar...</option>
                             <option value="Manual">Manual</option>
                             <option value="Automática">Automática</option>
                         </select>
                       </div>
                       <div>
-                        <label className="block font-bold mb-2">Combustible</label>
-                         <select name="combustible" value={formData.combustible} onChange={handleChange} className="w-full px-3 py-2 border border-gray-300 rounded">
+                        <label className="block font-bold mb-2 text-gray-700">Combustible</label>
+                         <select name="combustible" value={formData.combustible} onChange={handleChange} className="w-full px-3 py-2 border border-gray-300 rounded text-gray-900">
                              <option value="">Seleccionar...</option>
                             <option value="Nafta">Nafta</option>
                             <option value="Diesel">Diesel</option>
@@ -726,23 +726,23 @@ export default function AdminPanel() {
                   <>
                        <div>
                         <label className="block font-bold mb-2">Marca</label>
-                        <input type="text" name="brand" value={formData.brand} onChange={handleChange} className="w-full px-3 py-2 border border-gray-300 rounded" />
+                        <input type="text" name="brand" value={formData.brand} onChange={handleChange} className="w-full px-3 py-2 border border-gray-300 rounded text-gray-900" />
                       </div>
                       <div>
                         <label className="block font-bold mb-2">Modelo</label>
-                        <input type="text" name="model" value={formData.model} onChange={handleChange} className="w-full px-3 py-2 border border-gray-300 rounded" />
+                        <input type="text" name="model" value={formData.model} onChange={handleChange} className="w-full px-3 py-2 border border-gray-300 rounded text-gray-900" />
                       </div>
                        <div>
-                        <label className="block font-bold mb-2">Año</label>
-                        <input type="number" name="year" value={formData.year} onChange={handleChange} className="w-full px-3 py-2 border border-gray-300 rounded" />
+                        <label className="block font-bold mb-2 text-gray-700">Año</label>
+                        <input type="number" name="year" value={formData.year} onChange={handleChange} className="w-full px-3 py-2 border border-gray-300 rounded text-gray-900" />
                       </div>
                       <div>
-                        <label className="block font-bold mb-2">Horas de Uso</label>
-                        <input type="number" name="horas" value={formData.horas} onChange={handleChange} className="w-full px-3 py-2 border border-gray-300 rounded" placeholder="Ej: 5000" />
+                        <label className="block font-bold mb-2 text-gray-700">Horas de Uso</label>
+                        <input type="number" name="horas" value={formData.horas} onChange={handleChange} className="w-full px-3 py-2 border border-gray-300 rounded text-gray-900" placeholder="Ej: 5000" />
                       </div>
                       <div>
-                        <label className="block font-bold mb-2">Potencia (HP)</label>
-                        <input type="number" name="potencia" value={formData.potencia} onChange={handleChange} className="w-full px-3 py-2 border border-gray-300 rounded" placeholder="Ej: 180"/>
+                        <label className="block font-bold mb-2 text-gray-700">Potencia (HP)</label>
+                        <input type="number" name="potencia" value={formData.potencia} onChange={handleChange} className="w-full px-3 py-2 border border-gray-300 rounded text-gray-900" placeholder="Ej: 180"/>
                       </div>
                   </>
                   )}
@@ -751,12 +751,12 @@ export default function AdminPanel() {
                   {formData.category === 'HERRAMIENTA' && (
                    <>
                       <div>
-                        <label className="block font-bold mb-2">Marca / Fabricante</label>
-                        <input type="text" name="marca" value={formData.marca} onChange={handleChange} className="w-full px-3 py-2 border border-gray-300 rounded" />
+                        <label className="block font-bold mb-2 text-gray-700">Marca / Fabricante</label>
+                        <input type="text" name="marca" value={formData.marca} onChange={handleChange} className="w-full px-3 py-2 border border-gray-300 rounded text-gray-900" />
                       </div>
                        <div>
-                        <label className="block font-bold mb-2">Condición</label>
-                         <select name="condicion" value={formData.condicion} onChange={handleChange} className="w-full px-3 py-2 border border-gray-300 rounded">
+                        <label className="block font-bold mb-2 text-gray-700">Condición</label>
+                         <select name="condicion" value={formData.condicion} onChange={handleChange} className="w-full px-3 py-2 border border-gray-300 rounded text-gray-900">
                             <option value="Nuevo">Nuevo</option>
                             <option value="Usado">Usado</option>
                         </select>
@@ -765,7 +765,7 @@ export default function AdminPanel() {
                   )}
 
                   <div className="md:col-span-2">
-                    <label className="block font-bold mb-2">
+                    <label className="block font-bold mb-2 text-gray-700">
                       🖼️ Imágenes
                     </label>
                     <input
@@ -815,20 +815,20 @@ export default function AdminPanel() {
                   )}
 
                   <div className="md:col-span-2">
-                    <label className="block font-bold mb-2">Descripción</label>
-                    <textarea
-                      name="description"
-                      value={formData.description}
-                      onChange={handleChange}
-                      rows="3"
-                      className="w-full px-3 py-2 border border-gray-300 rounded"
-                    ></textarea>
+                    <label className="block font-bold mb-2 text-gray-700">Descripción</label>
+                      <textarea
+                        name="description"
+                        value={formData.description}
+                        onChange={handleChange}
+                        rows="3"
+                        className="w-full px-3 py-2 border border-gray-300 rounded text-gray-900"
+                      ></textarea>
                   </div>
                   
                   {/* Extras solo para Vehiculo/Maquinaria opcionalmente */}
                   {(formData.category === 'VEHICULO' || formData.category === 'MAQUINARIA') && (
                   <div className="md:col-span-2">
-                    <label className="block font-bold mb-2">
+                    <label className="block font-bold mb-2 text-gray-700">
                       Equipamiento / Extras (separado por comas)
                     </label>
                     <textarea
@@ -836,7 +836,7 @@ export default function AdminPanel() {
                       value={formData.equipamiento}
                       onChange={handleChange}
                       rows="2"
-                      className="w-full px-3 py-2 border border-gray-300 rounded"
+                      className="w-full px-3 py-2 border border-gray-300 rounded text-gray-900"
                       placeholder="Ej: Radio, GPS, Aire acondicionado"
                     ></textarea>
                   </div>
@@ -867,11 +867,11 @@ export default function AdminPanel() {
 
         {/* FILTROS */}
         <div className="bg-white p-6 rounded-lg shadow-lg mb-6">
-          <h3 className="text-xl font-bold mb-4">🔍 Filtros</h3>
+          <h3 className="text-xl font-bold mb-4 text-gray-800">🔍 Filtros</h3>
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
              <div>
-              <label className="block font-bold mb-2">Categoría</label>
-              <select name="category" value={filters.category} onChange={handleFilterChange} className="w-full px-3 py-2 border border-gray-300 rounded">
+              <label className="block font-bold mb-2 text-gray-700">Categoría</label>
+              <select name="category" value={filters.category} onChange={handleFilterChange} className="w-full px-3 py-2 border border-gray-300 rounded text-gray-900">
                   <option value="">Todas</option>
                   <option value="VEHICULO">Vehículos</option>
                   <option value="MAQUINARIA">Maquinaria</option>
@@ -879,25 +879,25 @@ export default function AdminPanel() {
               </select>
             </div>
             <div>
-              <label className="block font-bold mb-2">Buscar</label>
+              <label className="block font-bold mb-2 text-gray-700">Buscar</label>
               <input
                 type="text"
                 name="search"
                 value={filters.search}
                 onChange={handleFilterChange}
                 placeholder="Nombre, marca..."
-                className="w-full px-3 py-2 border border-gray-300 rounded"
+                className="w-full px-3 py-2 border border-gray-300 rounded text-gray-900"
               />
             </div>
             {/* ... Resto de filtros simplificados ... */}
              <div>
-              <label className="block font-bold mb-2">Precio Máx</label>
+              <label className="block font-bold mb-2 text-gray-700">Precio Máx</label>
               <input
                 type="number"
                 name="maxPrice"
                 value={filters.maxPrice}
                 onChange={handleFilterChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded"
+                className="w-full px-3 py-2 border border-gray-300 rounded text-gray-900"
               />
             </div>
           </div>
