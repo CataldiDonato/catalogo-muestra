@@ -437,8 +437,8 @@ const FiltersContent = ({
           className="w-full accent-blue-500 bg-slate-700"
         />
         <div className="flex justify-between text-xs text-slate-400">
-          <span>${priceRange[0].toLocaleString()}</span>
-          <span className="text-blue-400 font-bold">${priceRange[1].toLocaleString()}</span>
+          <span>${priceRange[0].toLocaleString('es-AR')}</span>
+          <span className="text-blue-400 font-bold">${priceRange[1].toLocaleString('es-AR')}</span>
         </div>
       </div>
     </div>

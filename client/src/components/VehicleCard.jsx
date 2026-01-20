@@ -67,6 +67,13 @@ export default function VehicleCard({ vehicle }) {
           </div>
         </div>
 
+        {/* Precio */}
+        <div className="mb-4">
+          <p className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+            {formatPrice(vehicle.price, vehicle.currency)}
+          </p>
+        </div>
+
         <div className="mt-auto pt-2">
           <Link
             to={`/catalogo/${vehicle.id}`}

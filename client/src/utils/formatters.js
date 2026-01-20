@@ -1,10 +1,11 @@
 /**
- * Formatea números como moneda USD
+ * Formatea números como moneda (soporta USD y ARS)
  */
-export const formatPrice = (price) => {
-  return new Intl.NumberFormat("es-MX", {
+export const formatPrice = (price, currency = 'USD') => {
+  return new Intl.NumberFormat("es-AR", {
     style: "currency",
-    currency: "USD",
+    currency: currency,
+    maximumFractionDigits: 0, // Generalmente para montos grandes en ARS no queremos decimales
   }).format(price);
 };
 

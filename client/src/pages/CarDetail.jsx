@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import API_ENDPOINTS from "../config";
 import whatsappIcon from "../images/whatsappblanco.png";
+import { formatPrice } from "../utils/formatters";
 
 export default function CarDetail() {
   const { id } = useParams();
@@ -120,11 +121,7 @@ export default function CarDetail() {
     );
   }
 
-  const formattedPrice = (price) =>
-    new Intl.NumberFormat("es-MX", {
-      style: "currency",
-      currency: "USD",
-    }).format(price);
+
 
   return (
     <div className="min-h-screen bg-slate-900 py-12">
@@ -248,8 +245,8 @@ export default function CarDetail() {
               {Number(car.price) > 0 && (
                 <>
                   <p className="text-sm text-slate-400 mb-2 uppercase tracking-widest font-bold">Precio Final</p>
-                  <p className="text-4xl font-extrabold text-blue-400 mb-6">
-                    {formattedPrice(car.price)}
+                  <p className="text-3xl sm:text-4xl font-black text-blue-400 mb-6 tracking-tighter break-words">
+                    {formatPrice(car.price, car.currency)}
                   </p>
                 </>
               )}
@@ -417,7 +414,7 @@ export default function CarDetail() {
                           <div>
                             <p className="text-xs text-slate-500 mb-1 uppercase font-bold">Precio</p>
                             <p className="text-xl font-bold text-blue-400">
-                              {formattedPrice(related.price)}
+                              {formatPrice(related.price, related.currency)}
                             </p>
                           </div>
                         )}
